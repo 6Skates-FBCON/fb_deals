@@ -76,7 +76,11 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.logoText}>FBDeals</Text>
+        <Image
+          source={require('@/assets/images/fbdeals-logo-new.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
       </View>
 
       {featuredDeal ? (
@@ -195,10 +199,9 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xs,
     alignItems: 'center',
   },
-  logoText: {
-    fontSize: 42,
-    fontWeight: '900',
-    color: Colors.primary,
+  logo: {
+    width: '100%',
+    height: 150,
     marginBottom: Spacing.xs,
   },
   subtitle: {
