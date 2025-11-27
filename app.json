@@ -2,7 +2,7 @@
   "expo": {
     "name": "FB Deals",
     "slug": "fb-deals",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "4"
+      "buildNumber": "5"
     },
     "web": {
       "bundler": "metro",
