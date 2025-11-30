@@ -24,6 +24,7 @@ export default function ProfileScreen() {
       console.error('Sign out error:', error);
     } finally {
       setLoading(false);
+      router.replace('/auth/login');
     }
   };
 
