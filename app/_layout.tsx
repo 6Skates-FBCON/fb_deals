@@ -1,61 +1,85 @@
-import { useEffect, useState } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/theme';
+// app/_layout.tsx
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Slot } from 'expo-router';
+import { AuthProvider } from '@/contexts/AuthContext';
 
-function RootLayoutNav() {
-  const { user, loading } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
+// 🔧 IMPORTANT: disable native screens to avoid the setSheetLargestUndimmedDetent crash
+import { enableScreens } from 'react-native-screens';
+enableScreens(false);
 
-  useEffect(() => {
-    if (loading || isNavigating) return;
+class RootErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; message: string | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: null };
+  }
 
-    const inAuthGroup = segments[0] === 'auth';
-
-    const navigate = async () => {
-      setIsNavigating(true);
-      try {
-        if (!user && !inAuthGroup) {
-          await router.replace('/auth/login');
-        } else if (user && inAuthGroup) {
-          await router.replace('/(tabs)');
-        }
-      } finally {
-        setIsNavigating(false);
-      }
+  static getDerivedStateFromError(error: unknown) {
+    return {
+      hasError: true,
+      message: error instanceof Error ? error.message : String(error),
     };
+  }
 
-    navigate();
-  }, [user, loading]);
+  componentDidCatch(error: unknown, info: unknown) {
+    console.error('[ROOT ERROR BOUNDARY] Error:', error, info);
+  }
 
-  return (
-    <>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="auth" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="admin" />
-        <Stack.Screen name="deal/[id]" />
-        <Stack.Screen name="checkout/[id]" />
-        <Stack.Screen name="success/[id]" />
-        <Stack.Screen name="error/[id]" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </>
-  );
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.title}>FB Deals – App Error</Text>
+          <Text style={styles.message}>
+            Something went wrong while loading the app.
+          </Text>
+          {this.state.message && (
+            <Text style={styles.details}>{this.state.message}</Text>
+          )}
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 export default function RootLayout() {
-  useFrameworkReady();
-
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <RootErrorBoundary>
+        <Slot />
+      </RootErrorBoundary>
     </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#0A6DFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  message: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  details: {
+    fontSize: 12,
+    color: '#E6E6E6',
+    textAlign: 'center',
+  },
+});

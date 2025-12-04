@@ -3,52 +3,67 @@ import 'react-native-url-polyfill/auto';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+// Raw env values (may be missing or malformed in some builds)
+const RAW_SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+const RAW_SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-    storage: Platform.OS === 'web' ? window.localStorage : AsyncStorage,
-  },
-});
+// Helper to validate URL so a bad env value doesn't crash native builds
+function getSafeUrl(raw: string | undefined | null): string {
+  if (!raw) return 'https://example.supabase.co';
+  try {
+    // Will throw if the URL is invalid
+    new URL(raw);
+    return raw;
+  } catch {
+    console.warn(
+      '[Supabase] Invalid EXPO_PUBLIC_SUPABASE_URL value, falling back to safe dummy URL.'
+    );
+    return 'https://example.supabase.co';
+  }
+}
 
-export type Database = {
-  public: {
-    Tables: {
-      deals: {
-        Row: {
-          id: string;
-          title: string;
-          description: string;
-          image_url: string;
-          regular_price: number;
-          sale_price: number;
-          quantity_total: number;
-          quantity_remaining: number;
-          start_date: string;
-          end_date: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Omit<Database['public']['Tables']['deals']['Row'], 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Database['public']['Tables']['deals']['Insert']>;
-      };
-      purchases: {
-        Row: {
-          id: string;
-          deal_id: string;
-          customer_email: string;
-          customer_name: string;
-          purchase_price: number;
-          status: 'pending' | 'completed' | 'failed' | 'refunded';
-          created_at: string;
-        };
-        Insert: Omit<Database['public']['Tables']['purchases']['Row'], 'id' | 'created_at'>;
-        Update: Partial<Database['public']['Tables']['purchases']['Insert']>;
-      };
-    };
-  };
-};
+function getSafeKey(raw: string | undefined | null): string {
+  if (!raw) {
+    console.warn(
+      '[Supabase] EXPO_PUBLIC_SUPABASE_ANON_KEY missing, using dummy key. ' +
+        'Auth and data calls will fail, but the app UI will still load.'
+    );
+    return 'public-anon-key';
+  }
+  return raw;
+}
+
+const supabaseUrl = getSafeUrl(RAW_SUPABASE_URL);
+const supabaseAnonKey = getSafeKey(RAW_SUPABASE_ANON_KEY);
+
+// Wrap createClient so even if something unexpected goes wrong,
+// we still return a non-crashing client.
+let client;
+
+try {
+  client = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+      storage: Platform.OS === 'web' ? window.localStorage : AsyncStorage,
+    },
+  });
+} catch (error) {
+  console.error(
+    '[Supabase] Failed to initialize Supabase client. Falling back to dummy client.',
+    error
+  );
+
+  // Last-resort fallback: dummy client that always "fails" gracefully.
+  client = createClient('https://example.supabase.co', 'public-anon-key', {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+      storage: Platform.OS === 'web' ? window.localStorage : AsyncStorage,
+    },
+  });
+}
+
+export const supabase = client;

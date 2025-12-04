@@ -7,10 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "jsEngine": "jsc",
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "5",
+      "buildNumber": "1",
       "bundleIdentifier": "com.sixskates.fbdeals",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -34,6 +34,9 @@
       "eas": {
         "projectId": "02437a51-f86e-4f71-bb97-762c09aee0ea"
       }
+    },
+    "android": {
+      "package": "com.sixskates.fbdeals"
     }
   }
 }

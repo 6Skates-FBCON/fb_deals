@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { StyleSheet, View, Text } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { Session, User, AuthError } from '@supabase/supabase-js';
+import type { Session, User, AuthError } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -14,74 +20,73 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+async function checkAdminStatus(userId: string): Promise<boolean> {
+  try {
+    console.log('[AUTH] Checking admin status for user:', userId);
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    console.log('[AUTH] Admin check result:', { data, error });
+    const isAdmin = !error && data !== null;
+    console.log('[AUTH] Is admin:', isAdmin);
+    return isAdmin;
+  } catch (err) {
+    console.error('[AUTH] Admin check exception:', err);
+    return false;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
-  const checkAdminStatus = async (userId: string) => {
-    try {
-      console.log('[AUTH] Checking admin status for user:', userId);
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      console.log('[AUTH] Admin check result:', { data, error });
-      const isAdmin = !error && data !== null;
-      console.log('[AUTH] Is admin:', isAdmin);
-      return isAdmin;
-    } catch (err) {
-      console.error('[AUTH] Admin check exception:', err);
-      return false;
-    }
-  };
 
   useEffect(() => {
     let mounted = true;
 
     const initAuth = async () => {
       try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        if (mounted) {
-          setSession(initialSession);
-          setUser(initialSession?.user ?? null);
+        const {
+          data: { session: initialSession },
+        } = await supabase.auth.getSession();
 
-          if (initialSession?.user) {
-            const adminStatus = await checkAdminStatus(initialSession.user.id);
-            setIsAdmin(adminStatus);
-          } else {
-            setIsAdmin(false);
-          }
+        if (!mounted) return;
 
-          setLoading(false);
-          setInitialized(true);
+        setSession(initialSession ?? null);
+        setUser(initialSession?.user ?? null);
+
+        if (initialSession?.user) {
+          const adminStatus = await checkAdminStatus(initialSession.user.id);
+          if (mounted) setIsAdmin(adminStatus);
+        } else {
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        if (mounted) {
-          setLoading(false);
-          setInitialized(true);
-        }
+      } finally {
+        if (mounted) setLoading(false);
       }
     };
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
-      if (mounted) {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
+      if (!mounted) return;
 
-        if (currentSession?.user) {
-          const adminStatus = await checkAdminStatus(currentSession.user.id);
-          setIsAdmin(adminStatus);
-        } else {
-          setIsAdmin(false);
-        }
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+
+      if (currentSession?.user) {
+        const adminStatus = await checkAdminStatus(currentSession.user.id);
+        if (mounted) setIsAdmin(adminStatus);
+      } else {
+        setIsAdmin(false);
       }
     });
 
@@ -91,27 +96,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  if (!initialized) {
-    return null;
+  // 🔑 IMPORTANT: do NOT block rendering here.
+  // The app will render immediately; screens can use `loading`
+  // if they want to show spinners.
+  return (
+    <AuthContext.Provider
+      value={{ user, session, loading, isAdmin, signUp, signIn, signOut }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+
+  async function signUp(email: string, password: string) {
+    const { error } = await supabase.auth.signUp({ email, password });
+    return { error };
   }
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { error };
-  };
-
-  const signIn = async (email: string, password: string) => {
+  async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     return { error };
-  };
+  }
 
-  const signOut = async () => {
+  async function signOut() {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -122,19 +131,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign out failed:', error);
       throw error;
     }
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, signUp, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  }
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+  return ctx;
 }
+
+const styles = StyleSheet.create({
+  // kept here in case we want a loading UI again later
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+});

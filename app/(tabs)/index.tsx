@@ -1,11 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Typography, Spacing } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { DealCard } from '@/components/DealCard';
 import { getDealStatus } from '@/utils/dealUtils';
-import { BlurView } from 'expo-blur';
 import { EnrichedDeal } from '@/types/deal';
 import { enrichDealsWithShopifyData } from '@/utils/dealEnrichment';
 
@@ -72,7 +80,9 @@ export default function HomeScreen() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.white} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.white} />
+      }
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
@@ -86,26 +96,21 @@ export default function HomeScreen() {
       {featuredDeal ? (
         <>
           <View style={styles.section}>
-            <DealCard
-              deal={featuredDeal}
-              onPress={() => handleDealPress(featuredDeal.id)}
-              variant="spotlight"
-            />
+            <DealCard deal={featuredDeal} onPress={() => handleDealPress(featuredDeal.id)} variant="spotlight" />
           </View>
 
+          {/* UP NEXT card #1 */}
           <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.comingSoonCard}
-              activeOpacity={0.9}
-              disabled
-            >
+            <TouchableOpacity style={styles.comingSoonCard} activeOpacity={0.9} disabled>
               <View style={styles.comingSoonHeader}>
                 <Text style={styles.comingSoonHeaderText}>UP NEXT</Text>
               </View>
               <View style={styles.cardInner}>
                 <View style={styles.imageWrapper}>
                   <Image
-                    source={{ uri: 'https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg' }}
+                    source={{
+                      uri: 'https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg',
+                    }}
                     style={styles.squareImage}
                     resizeMode="cover"
                     blurRadius={10}
@@ -122,28 +127,27 @@ export default function HomeScreen() {
                   </Text>
 
                   <View style={styles.priceBlock}>
-                    <BlurView intensity={20} style={styles.blurredPrice}>
+                    <View style={styles.blurredPrice}>
                       <Text style={styles.salePrice}>$XX.XX</Text>
-                    </BlurView>
+                    </View>
                   </View>
                 </View>
               </View>
             </TouchableOpacity>
           </View>
 
+          {/* UP NEXT card #2 */}
           <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.comingSoonCard}
-              activeOpacity={0.9}
-              disabled
-            >
+            <TouchableOpacity style={styles.comingSoonCard} activeOpacity={0.9} disabled>
               <View style={styles.comingSoonHeader}>
                 <Text style={styles.comingSoonHeaderText}>UP NEXT</Text>
               </View>
               <View style={styles.cardInner}>
                 <View style={styles.imageWrapper}>
                   <Image
-                    source={{ uri: 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg' }}
+                    source={{
+                      uri: 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg',
+                    }}
                     style={styles.squareImage}
                     resizeMode="cover"
                     blurRadius={10}
@@ -160,9 +164,9 @@ export default function HomeScreen() {
                   </Text>
 
                   <View style={styles.priceBlock}>
-                    <BlurView intensity={20} style={styles.blurredPrice}>
+                    <View style={styles.blurredPrice}>
                       <Text style={styles.salePrice}>$XX.XX</Text>
-                    </BlurView>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -204,19 +208,8 @@ const styles = StyleSheet.create({
     height: 150,
     marginBottom: Spacing.xs,
   },
-  subtitle: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginTop: 4,
-  },
   section: {
     marginBottom: Spacing.xl,
-  },
-  sectionTitle: {
-    ...Typography.heading,
-    color: Colors.white,
-    marginBottom: Spacing.md,
-    fontWeight: '600',
   },
   comingSoonCard: {
     backgroundColor: '#1A1A1A',
@@ -292,6 +285,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 8,
     overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   salePrice: {
     fontSize: 24,
