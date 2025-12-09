@@ -4,12 +4,11 @@ import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { Button } from '@/components/Button';
 
 export default function LocationScreen() {
-  const shopAddress = '123 Queen Street West, Toronto, ON M5H 2M9';
-  const shopPhone = '(416) 555-6728';
+  const shopAddress = '1936 Danforth Ave, Toronto, ON M4C 1J4';
   const shopHours = [
-    { day: 'Monday - Friday', hours: '11:00 AM - 8:00 PM' },
-    { day: 'Saturday', hours: '10:00 AM - 9:00 PM' },
-    { day: 'Sunday', hours: '12:00 PM - 6:00 PM' },
+    { day: 'Wednesday - Friday', hours: '3:00 PM - 7:00 PM' },
+    { day: 'Saturday', hours: '2:00 PM - 7:00 PM' },
+    { day: 'Sunday', hours: '2:00 PM - 7:00 PM' },
   ];
 
   const handleGetDirections = () => {
