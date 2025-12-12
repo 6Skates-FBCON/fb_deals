@@ -182,7 +182,7 @@ export default function AddDealScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search products..."
-            placeholderTextColor={Colors.midGrey}
+            placeholderTextColor={Colors.white}
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -256,7 +256,7 @@ export default function AddDealScreen() {
               value={title}
               onChangeText={setTitle}
               placeholder="Deal title"
-              placeholderTextColor={Colors.midGrey}
+              placeholderTextColor={Colors.white}
             />
           </View>
 
@@ -267,7 +267,7 @@ export default function AddDealScreen() {
               value={description}
               onChangeText={setDescription}
               placeholder="Deal description"
-              placeholderTextColor={Colors.midGrey}
+              placeholderTextColor={Colors.white}
               multiline
               numberOfLines={4}
             />
@@ -285,7 +285,7 @@ export default function AddDealScreen() {
                 value={regularPrice}
                 onChangeText={setRegularPrice}
                 placeholder="0.00"
-                placeholderTextColor={Colors.midGrey}
+                placeholderTextColor={Colors.white}
                 keyboardType="decimal-pad"
               />
             </View>
@@ -297,7 +297,7 @@ export default function AddDealScreen() {
                 value={salePrice}
                 onChangeText={setSalePrice}
                 placeholder="0.00"
-                placeholderTextColor={Colors.midGrey}
+                placeholderTextColor={Colors.white}
                 keyboardType="decimal-pad"
               />
             </View>
@@ -314,7 +314,7 @@ export default function AddDealScreen() {
               value={quantityTotal}
               onChangeText={setQuantityTotal}
               placeholder="0"
-              placeholderTextColor={Colors.midGrey}
+              placeholderTextColor={Colors.white}
               keyboardType="number-pad"
             />
           </View>
