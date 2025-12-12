@@ -107,19 +107,22 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <View style={styles.divider} />
-
-          <View style={styles.infoRow}>
-            <View style={styles.iconContainer}>
-              <Settings size={20} color={isAdmin ? Colors.primary : Colors.textSecondary} strokeWidth={2} />
-            </View>
-            <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Account Type</Text>
-              <Text style={[styles.infoValue, isAdmin && styles.adminBadge]}>
-                {isAdmin ? 'Administrator' : 'Standard User'}
-              </Text>
-            </View>
-          </View>
+          {isAdmin && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.infoRow}>
+                <View style={styles.iconContainer}>
+                  <Settings size={20} color={Colors.primary} strokeWidth={2} />
+                </View>
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Account Type</Text>
+                  <Text style={[styles.infoValue, styles.adminBadge]}>
+                    Administrator
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
       </View>
 
