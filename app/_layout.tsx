@@ -1,8 +1,10 @@
 // app/_layout.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Slot } from 'expo-router';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 // 🔧 IMPORTANT: disable native screens to avoid the setSheetLargestUndimmedDetent crash
 import { enableScreens } from 'react-native-screens';
@@ -48,10 +50,22 @@ class RootErrorBoundary extends React.Component<
 }
 
 export default function RootLayout() {
+  useFrameworkReady();
+
   return (
     <AuthProvider>
       <RootErrorBoundary>
-        <Slot />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+          <Stack.Screen name="admin" options={{ headerShown: false }} />
+          <Stack.Screen name="deal/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="checkout/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="success/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="error/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="light" />
       </RootErrorBoundary>
     </AuthProvider>
   );
