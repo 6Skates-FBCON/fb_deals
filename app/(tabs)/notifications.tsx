@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   infoBox: {
-    backgroundColor: Colors.tertiary,
+    backgroundColor: '#021B3D',
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.xl,
