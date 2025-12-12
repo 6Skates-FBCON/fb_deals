@@ -1,12 +1,5 @@
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 
 export default function Website() {
-  return <View style={styles.container} />;
+  return <View />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#021B3D',
-  },
-});

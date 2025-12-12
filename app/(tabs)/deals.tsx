@@ -115,7 +115,7 @@ export default function DealsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#021B3D',
+    backgroundColor: Colors.white,
   },
   contentContainer: {
     padding: Spacing.lg,
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#021B3D',
+    backgroundColor: Colors.white,
   },
   header: {
     marginBottom: Spacing.xl,
@@ -132,14 +132,14 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.hero,
-    color: Colors.white,
+    color: Colors.black,
   },
   section: {
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: Colors.black,
     marginBottom: Spacing.md,
   },
   dealItem: {
@@ -152,12 +152,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: Colors.black,
     marginBottom: Spacing.sm,
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.midGrey,
     textAlign: 'center',
   },
 });

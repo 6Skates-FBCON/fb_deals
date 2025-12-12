@@ -4,7 +4,7 @@ export const Colors = {
   tertiary: '#8B4FD9',
   accent: '#FF5757',
   black: '#000000',
-  darkBg: '#021B3D',
+  darkBg: '#007bff',
   charcoal: '#1A1A1A',
   cardBg: '#1C1C1E',
   midGrey: '#000000',
