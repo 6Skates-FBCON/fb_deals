@@ -1,11 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity } from 'react-native';
-import { MapPin, Clock, Phone, ExternalLink } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, Linking } from 'react-native';
+import { MapPin, Clock } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { Button } from '@/components/Button';
 
 export default function LocationScreen() {
   const shopAddress = '1936 Danforth Ave, Toronto, ON M4C 1J4';
-  const shopPhone = '+1 (416) 123-4567';
   const shopHours = [
     { day: 'Wednesday - Friday', hours: '3:00 PM - 7:00 PM' },
     { day: 'Saturday', hours: '2:00 PM - 7:00 PM' },
@@ -15,10 +14,6 @@ export default function LocationScreen() {
   const handleGetDirections = () => {
     const url = `https://maps.google.com/?q=${encodeURIComponent('6Skates Toronto')}`;
     Linking.openURL(url);
-  };
-
-  const handleCall = () => {
-    Linking.openURL(`tel:${shopPhone.replace(/[^0-9]/g, '')}`);
   };
 
   return (
@@ -48,15 +43,6 @@ export default function LocationScreen() {
             <Text style={styles.hoursText}>{schedule.hours}</Text>
           </View>
         ))}
-      </View>
-
-      <View style={styles.card}>
-        <View style={styles.iconHeader}>
-          <Phone size={24} color={Colors.primary} />
-          <Text style={styles.cardTitle}>Contact</Text>
-        </View>
-        <Text style={styles.phoneText}>{shopPhone}</Text>
-        <Button title="Call Shop" onPress={handleCall} variant="secondary" fullWidth />
       </View>
 
       <View style={styles.infoBox}>
@@ -133,12 +119,7 @@ const styles = StyleSheet.create({
   },
   hoursText: {
     ...Typography.body,
-    color: Colors.textSecondary,
-  },
-  phoneText: {
-    ...Typography.title,
-    color: Colors.primary,
-    marginBottom: Spacing.lg,
+    color: Colors.white,
   },
   infoBox: {
     backgroundColor: Colors.secondary,
