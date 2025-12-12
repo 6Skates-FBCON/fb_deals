@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   infoBox: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: '#021B3D',
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.xl,
