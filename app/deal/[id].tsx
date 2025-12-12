@@ -18,10 +18,12 @@ import { CountdownTimer } from '@/components/CountdownTimer';
 import { getDealStatus, formatPrice } from '@/utils/dealUtils';
 import { Deal, EnrichedDeal } from '@/types/deal';
 import { enrichDealWithShopifyData } from '@/utils/dealEnrichment';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function DealDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user, loading: authLoading } = useAuth();
   const [deal, setDeal] = useState<EnrichedDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -51,8 +53,16 @@ export default function DealDetailScreen() {
   }, [id]);
 
   useEffect(() => {
-    fetchDeal();
-  }, [fetchDeal]);
+    if (!authLoading && !user) {
+      router.replace('/auth/login');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDeal();
+    }
+  }, [fetchDeal, user]);
 
   const handlePurchase = () => {
     if (!deal) return;
@@ -63,12 +73,16 @@ export default function DealDetailScreen() {
     router.back();
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   if (!deal) {

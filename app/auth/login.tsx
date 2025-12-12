@@ -46,6 +46,8 @@ export default function LoginScreen() {
       } else {
         setError(signInError.message);
       }
+    } else {
+      router.replace('/(tabs)');
     }
   };
 

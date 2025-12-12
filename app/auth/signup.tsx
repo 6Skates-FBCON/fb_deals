@@ -51,6 +51,8 @@ export default function SignUpScreen() {
 
     if (signUpError) {
       setError(signUpError.message);
+    } else {
+      router.replace('/(tabs)');
     }
   };
 
