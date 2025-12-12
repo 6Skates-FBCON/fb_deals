@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   notificationPreview: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.white,
     lineHeight: 18,
   },
   unreadDot: {
