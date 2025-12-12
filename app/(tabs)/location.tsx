@@ -5,6 +5,7 @@ import { Button } from '@/components/Button';
 
 export default function LocationScreen() {
   const shopAddress = '1936 Danforth Ave, Toronto, ON M4C 1J4';
+  const shopPhone = '+1 (416) 123-4567';
   const shopHours = [
     { day: 'Wednesday - Friday', hours: '3:00 PM - 7:00 PM' },
     { day: 'Saturday', hours: '2:00 PM - 7:00 PM' },
