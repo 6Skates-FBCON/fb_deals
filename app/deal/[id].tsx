@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Linking from 'expo-linking';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
@@ -174,9 +175,20 @@ export default function DealDetailScreen() {
           )}
 
           {isSoldOut && (
-            <View style={styles.soldOutBanner}>
+            <LinearGradient
+              colors={['#2C2C2E', '#1C1C1E', '#2C2C2E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.soldOutBanner}
+            >
+              <View style={styles.soldOutStripesContainer}>
+                <View style={styles.soldOutStripe} />
+                <View style={styles.soldOutStripe} />
+                <View style={styles.soldOutStripe} />
+                <View style={styles.soldOutStripe} />
+              </View>
               <Text style={styles.soldOutText}>SOLD OUT</Text>
-            </View>
+            </LinearGradient>
           )}
 
           {isExpired && (
@@ -330,15 +342,46 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   soldOutBanner: {
-    backgroundColor: Colors.cardBg,
     padding: Spacing.lg,
     borderRadius: BorderRadius.xl,
     marginTop: Spacing.lg,
+    borderWidth: 2,
+    borderColor: '#3A3A3C',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  soldOutStripesContainer: {
+    position: 'absolute',
+    top: -50,
+    left: -50,
+    right: -50,
+    bottom: -50,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    transform: [{ rotate: '-45deg' }],
+    opacity: 0.15,
+  },
+  soldOutStripe: {
+    width: 40,
+    height: '200%',
+    backgroundColor: '#48484A',
   },
   soldOutText: {
-    ...Typography.heading,
-    color: Colors.textSecondary,
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#8E8E93',
     textAlign: 'center',
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   expiredBanner: {
     backgroundColor: Colors.cardBg,

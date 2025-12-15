@@ -27,9 +27,15 @@ export function DealCard({ deal, onPress, variant = 'list' }: DealCardProps) {
   const renderStatusBadge = () => {
     if (status === 'sold_out') {
       return (
-        <View style={[styles.badge, styles.soldOutBadge]}>
+        <LinearGradient
+          colors={['#2C2C2E', '#1C1C1E']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.badge, styles.soldOutBadge]}
+        >
+          <View style={styles.soldOutStripes} />
           <Text style={styles.soldOutText}>SOLD OUT</Text>
-        </View>
+        </LinearGradient>
       );
     }
 
@@ -233,7 +239,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF5757',
   },
   soldOutBadge: {
-    backgroundColor: Colors.midGrey,
+    borderWidth: 1.5,
+    borderColor: '#3A3A3C',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  soldOutStripes: {
+    position: 'absolute',
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    opacity: 0.15,
+    transform: [{ rotate: '-45deg' }],
+    borderWidth: 3,
+    borderColor: '#48484A',
+    borderStyle: 'solid',
   },
   comingSoonBadge: {
     backgroundColor: Colors.charcoal,
@@ -246,7 +271,12 @@ const styles = StyleSheet.create({
   },
   soldOutText: {
     ...Typography.smallBold,
-    color: Colors.white,
+    color: '#8E8E93',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   comingSoonText: {
     ...Typography.smallBold,
