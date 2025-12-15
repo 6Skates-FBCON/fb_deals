@@ -126,7 +126,7 @@ export function DealCard({ deal, onPress, variant = 'list' }: DealCardProps) {
 
           {status === 'active' && (
             <View style={styles.timeContainer}>
-              <Clock size={14} color={Colors.textSecondary} />
+              <Clock size={14} color={Colors.white} />
               <Text style={styles.timeText}>
                 Ends in {timeRemaining}
               </Text>
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 13,
     fontWeight: '400' as const,
-    color: Colors.textSecondary,
+    color: Colors.white,
   },
   urgencyContainer: {
     backgroundColor: '#FF453A20',
