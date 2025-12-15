@@ -122,24 +122,19 @@ export default function CheckoutScreen() {
       </TouchableOpacity>
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.title}>Checkout</Text>
+        <Text style={styles.title}>Secure Checkout</Text>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
+            You'll be redirected to our secure Shopify checkout to complete your purchase. All payment information is processed securely by Shopify.
+          </Text>
+        </View>
 
         <View style={styles.dealSummary}>
           <Text style={styles.summaryTitle}>{deal.title}</Text>
           <View style={styles.priceRow}>
             <Text style={styles.label}>Price:</Text>
             <Text style={styles.price}>{formatPrice(deal.sale_price)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.formTitle}>Secure Checkout</Text>
-
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
-              You'll be redirected to our secure Shopify checkout to complete your purchase.
-              All payment information is processed securely by Shopify.
-            </Text>
           </View>
         </View>
       </ScrollView>
@@ -150,7 +145,7 @@ export default function CheckoutScreen() {
           <Text style={styles.totalPrice}>{formatPrice(deal.sale_price)}</Text>
         </View>
         <Button
-          title="Continue to Shopify Checkout"
+          title="Buy Now"
           onPress={handlePurchase}
           loading={purchasing}
           fullWidth
@@ -163,7 +158,7 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#0A6DFF',
   },
   backButton: {
     position: 'absolute',
@@ -173,7 +168,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(28,28,30,0.9)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.black,
@@ -186,13 +181,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#0A6DFF',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#0A6DFF',
     padding: Spacing.lg,
   },
   errorText: {
@@ -204,22 +199,34 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: Spacing.lg,
+    paddingTop: Spacing.xl + 60,
     paddingBottom: 200,
   },
   title: {
-    ...Typography.hero,
+    fontSize: 32,
+    fontWeight: '700',
     color: Colors.white,
     marginBottom: Spacing.xl,
-    marginTop: Spacing.lg,
-    textAlign: 'center',
+    textAlign: 'left',
+  },
+  infoBox: {
+    backgroundColor: '#1E4FCC',
+    padding: Spacing.xl,
+    borderRadius: BorderRadius.xl,
+    marginBottom: Spacing.xl,
+  },
+  infoText: {
+    fontSize: 16,
+    color: Colors.black,
+    lineHeight: 24,
   },
   dealSummary: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     marginBottom: Spacing.xl,
-    borderWidth: 2,
-    borderColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   summaryTitle: {
     ...Typography.heading,
@@ -233,58 +240,22 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.body,
-    color: Colors.primary,
+    color: Colors.white,
   },
   price: {
     ...Typography.title,
-    color: Colors.primary,
-  },
-  form: {
-    marginBottom: Spacing.xl,
-  },
-  formTitle: {
-    ...Typography.heading,
     color: Colors.white,
-    marginBottom: Spacing.lg,
-  },
-  inputGroup: {
-    marginBottom: Spacing.lg,
-  },
-  inputLabel: {
-    ...Typography.bodyBold,
-    color: Colors.white,
-    marginBottom: Spacing.sm,
-  },
-  input: {
-    backgroundColor: Colors.cardBg,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    ...Typography.body,
-    color: Colors.white,
-  },
-  infoBox: {
-    backgroundColor: Colors.primary + '15',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    marginTop: Spacing.md,
-  },
-  infoText: {
-    ...Typography.caption,
-    color: Colors.black,
-    lineHeight: 20,
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     padding: Spacing.lg,
-    borderTopWidth: 2,
-    borderTopColor: Colors.primary,
-    shadowColor: Colors.primary,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.2)',
+    shadowColor: Colors.black,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -302,6 +273,6 @@ const styles = StyleSheet.create({
   },
   totalPrice: {
     ...Typography.title,
-    color: Colors.primary,
+    color: Colors.white,
   },
 });
