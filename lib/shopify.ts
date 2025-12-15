@@ -264,80 +264,103 @@ export async function createCheckout(variantId: string, quantity: number = 1) {
   }
 }
 
-export async function getAllProducts(first: number = 50): Promise<ShopifyProduct[]> {
-  const query = `
-    query getProducts($first: Int!) {
-      products(first: $first) {
-        edges {
-          node {
-            id
-            title
-            description
-            handle
-            images(first: 1) {
-              edges {
-                node {
-                  url
-                  altText
-                }
-              }
-            }
-            priceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-              maxVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            compareAtPriceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-              maxVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            variants(first: 1) {
-              edges {
-                node {
-                  id
-                  title
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  compareAtPrice {
-                    amount
-                    currencyCode
-                  }
-                  availableForSale
-                  quantityAvailable
-                }
-              }
-            }
-            availableForSale
-            totalInventory
-          }
-        }
-      }
-    }
-  `;
+export async function getAllProducts(first: number = 250): Promise<ShopifyProduct[]> {
+  let allProducts: ShopifyProduct[] = [];
+  let hasNextPage = true;
+  let cursor: string | null = null;
 
   try {
-    const data = await shopifyFetch<{
-      products: {
-        edges: Array<{ node: ShopifyProduct }>;
-      };
-    }>(query, { first });
+    while (hasNextPage && allProducts.length < first) {
+      const query = `
+        query getProducts($first: Int!, $after: String) {
+          products(first: $first, after: $after) {
+            edges {
+              node {
+                id
+                title
+                description
+                handle
+                images(first: 1) {
+                  edges {
+                    node {
+                      url
+                      altText
+                    }
+                  }
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                  maxVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+                compareAtPriceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                  maxVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+                variants(first: 1) {
+                  edges {
+                    node {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      compareAtPrice {
+                        amount
+                        currencyCode
+                      }
+                      availableForSale
+                      quantityAvailable
+                    }
+                  }
+                }
+                availableForSale
+                totalInventory
+              }
+              cursor
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      `;
 
-    return data.products.edges.map((edge) => edge.node);
+      const data = await shopifyFetch<{
+        products: {
+          edges: Array<{ node: ShopifyProduct; cursor: string }>;
+          pageInfo: {
+            hasNextPage: boolean;
+            endCursor: string;
+          };
+        };
+      }>(query, { first: Math.min(250, first - allProducts.length), after: cursor });
+
+      const products = data.products.edges.map((edge) => edge.node);
+      allProducts = [...allProducts, ...products];
+
+      hasNextPage = data.products.pageInfo.hasNextPage;
+      cursor = data.products.pageInfo.endCursor;
+
+      if (products.length === 0) break;
+    }
+
+    return allProducts;
   } catch (error) {
     console.error('Error fetching all products:', error);
-    return [];
+    return allProducts;
   }
 }

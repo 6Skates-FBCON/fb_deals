@@ -40,23 +40,15 @@ export default function AddDealScreen() {
     if (!searchQuery.trim()) return shopifyProducts;
 
     const query = searchQuery.toLowerCase().trim();
-    const queryWords = query.split(' ');
-
-    return shopifyProducts.filter((product) => {
-      const searchableText = [
-        product.title.toLowerCase(),
-        product.handle.toLowerCase(),
-        product.description.toLowerCase(),
-      ].join(' ');
-
-      return queryWords.every((word) => searchableText.includes(word));
-    });
+    return shopifyProducts.filter((product) =>
+      product.title.toLowerCase().includes(query)
+    );
   }, [shopifyProducts, searchQuery]);
 
   const loadShopifyProducts = async () => {
     setLoadingProducts(true);
     try {
-      const products = await getAllProducts(250);
+      const products = await getAllProducts(1000);
       setShopifyProducts(products);
       setShowProductPicker(true);
     } catch (error) {
@@ -210,7 +202,7 @@ export default function AddDealScreen() {
               </Text>
               {searchQuery && (
                 <Text style={styles.emptyHint}>
-                  Try searching by product name, description, or handle
+                  Try searching by product name
                 </Text>
               )}
             </View>
