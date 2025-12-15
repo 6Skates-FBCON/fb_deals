@@ -48,12 +48,22 @@ export default function AddDealScreen() {
   const loadShopifyProducts = async () => {
     setLoadingProducts(true);
     try {
+      console.log('[SHOPIFY] Loading products...');
       const products = await getAllProducts(1000);
-      setShopifyProducts(products);
-      setShowProductPicker(true);
-    } catch (error) {
-      console.error('Error loading products:', error);
-      Alert.alert('Error', 'Failed to load Shopify products');
+      console.log('[SHOPIFY] Loaded products:', products.length);
+
+      if (products.length === 0) {
+        Alert.alert(
+          'No Products Found',
+          'No products were found in your Shopify store. Please make sure your store has active products.'
+        );
+      } else {
+        setShopifyProducts(products);
+        setShowProductPicker(true);
+      }
+    } catch (error: any) {
+      console.error('[SHOPIFY] Error loading products:', error);
+      Alert.alert('Error', error.message || 'Failed to load Shopify products. Please check your store credentials.');
     } finally {
       setLoadingProducts(false);
     }

@@ -57,6 +57,12 @@ export interface ShopifyProduct {
 }
 
 async function shopifyFetch<T>(query: string, variables: Record<string, any> = {}): Promise<T> {
+  if (!SHOPIFY_STORE_URL || !SHOPIFY_STOREFRONT_TOKEN) {
+    throw new Error('Shopify credentials are not configured. Please check your environment variables.');
+  }
+
+  console.log('[SHOPIFY] Fetching from:', SHOPIFY_STORE_URL);
+
   const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/graphql.json`, {
     method: 'POST',
     headers: {
@@ -67,12 +73,15 @@ async function shopifyFetch<T>(query: string, variables: Record<string, any> = {
   });
 
   if (!response.ok) {
-    throw new Error(`Shopify API error: ${response.statusText}`);
+    const text = await response.text();
+    console.error('[SHOPIFY] API error response:', text);
+    throw new Error(`Shopify API error: ${response.status} ${response.statusText}`);
   }
 
   const json = await response.json();
 
   if (json.errors) {
+    console.error('[SHOPIFY] GraphQL errors:', json.errors);
     throw new Error(`Shopify GraphQL error: ${JSON.stringify(json.errors)}`);
   }
 
@@ -269,8 +278,13 @@ export async function getAllProducts(first: number = 250): Promise<ShopifyProduc
   let hasNextPage = true;
   let cursor: string | null = null;
 
+  console.log('[SHOPIFY] getAllProducts called with limit:', first);
+
   try {
     while (hasNextPage && allProducts.length < first) {
+      const batchSize = Math.min(250, first - allProducts.length);
+      console.log('[SHOPIFY] Fetching batch of', batchSize, 'products, cursor:', cursor);
+
       const query = `
         query getProducts($first: Int!, $after: String) {
           products(first: $first, after: $after) {
@@ -347,20 +361,25 @@ export async function getAllProducts(first: number = 250): Promise<ShopifyProduc
             endCursor: string;
           };
         };
-      }>(query, { first: Math.min(250, first - allProducts.length), after: cursor });
+      }>(query, { first: batchSize, after: cursor });
 
       const products = data.products.edges.map((edge) => edge.node);
+      console.log('[SHOPIFY] Received', products.length, 'products in this batch');
       allProducts = [...allProducts, ...products];
 
       hasNextPage = data.products.pageInfo.hasNextPage;
       cursor = data.products.pageInfo.endCursor;
 
-      if (products.length === 0) break;
+      if (products.length === 0) {
+        console.log('[SHOPIFY] No more products to fetch');
+        break;
+      }
     }
 
+    console.log('[SHOPIFY] Total products loaded:', allProducts.length);
     return allProducts;
   } catch (error) {
-    console.error('Error fetching all products:', error);
-    return allProducts;
+    console.error('[SHOPIFY] Error fetching all products:', error);
+    throw error;
   }
 }
