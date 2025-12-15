@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { ArrowLeft } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
@@ -20,6 +21,7 @@ import { getDealStatus, formatPrice } from '@/utils/dealUtils';
 import { Deal, EnrichedDeal } from '@/types/deal';
 import { enrichDealWithShopifyData } from '@/utils/dealEnrichment';
 import { useAuth } from '@/contexts/AuthContext';
+import { createCheckout } from '@/lib/shopify';
 
 export default function DealDetailScreen() {
   const router = useRouter();
@@ -65,9 +67,39 @@ export default function DealDetailScreen() {
     }
   }, [fetchDeal, user]);
 
-  const handlePurchase = () => {
-    if (!deal) return;
-    router.push(`/checkout/${deal.id}`);
+  const handlePurchase = async () => {
+    if (!deal || !deal.shopifyProduct) {
+      Alert.alert('Error', 'Product information not available');
+      return;
+    }
+
+    if (deal.quantity_remaining <= 0) {
+      Alert.alert('Sold Out', 'This deal is no longer available');
+      return;
+    }
+
+    setPurchasing(true);
+
+    try {
+      const checkout = await createCheckout(deal.shopifyProduct.variantId, 1);
+
+      if (!checkout || !checkout.webUrl) {
+        throw new Error('Failed to create checkout');
+      }
+
+      const supported = await Linking.canOpenURL(checkout.webUrl);
+
+      if (supported) {
+        await Linking.openURL(checkout.webUrl);
+      } else {
+        throw new Error('Cannot open checkout URL');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      Alert.alert('Error', 'Failed to start checkout. Please try again.');
+    } finally {
+      setPurchasing(false);
+    }
   };
 
   const handleBack = () => {
