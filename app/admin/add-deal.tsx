@@ -39,18 +39,24 @@ export default function AddDealScreen() {
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return shopifyProducts;
 
-    const query = searchQuery.toLowerCase();
-    return shopifyProducts.filter(
-      (product) =>
-        product.title.toLowerCase().includes(query) ||
-        product.handle.toLowerCase().includes(query)
-    );
+    const query = searchQuery.toLowerCase().trim();
+    const queryWords = query.split(' ');
+
+    return shopifyProducts.filter((product) => {
+      const searchableText = [
+        product.title.toLowerCase(),
+        product.handle.toLowerCase(),
+        product.description.toLowerCase(),
+      ].join(' ');
+
+      return queryWords.every((word) => searchableText.includes(word));
+    });
   }, [shopifyProducts, searchQuery]);
 
   const loadShopifyProducts = async () => {
     setLoadingProducts(true);
     try {
-      const products = await getAllProducts(50);
+      const products = await getAllProducts(250);
       setShopifyProducts(products);
       setShowProductPicker(true);
     } catch (error) {
@@ -188,12 +194,25 @@ export default function AddDealScreen() {
           />
         </View>
 
+        {searchQuery.trim() !== '' && (
+          <View style={styles.resultsCounter}>
+            <Text style={styles.resultsText}>
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'} found
+            </Text>
+          </View>
+        )}
+
         <ScrollView style={styles.productList} showsVerticalScrollIndicator={false}>
           {filteredProducts.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>
                 {searchQuery ? 'No products found' : 'No products available'}
               </Text>
+              {searchQuery && (
+                <Text style={styles.emptyHint}>
+                  Try searching by product name, description, or handle
+                </Text>
+              )}
             </View>
           ) : (
             filteredProducts.map((product) => (
@@ -513,5 +532,19 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  emptyHint: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+  },
+  resultsCounter: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.sm,
+  },
+  resultsText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
   },
 });
