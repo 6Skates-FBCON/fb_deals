@@ -1,17 +1,27 @@
 import { Deal, EnrichedDeal } from '@/types/deal';
 import { getProductByHandle, getProductById, ShopifyProduct } from '@/lib/shopify';
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | null> {
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
+  return Promise.race([promise, timeout]);
+}
+
 export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDeal> {
   try {
+    if (!deal.shopify_handle && !deal.shopify_product_id) {
+      return deal as EnrichedDeal;
+    }
+
     let shopifyProduct: ShopifyProduct | null = null;
 
     if (deal.shopify_handle) {
-      shopifyProduct = await getProductByHandle(deal.shopify_handle);
+      shopifyProduct = await withTimeout(getProductByHandle(deal.shopify_handle), 5000);
     } else if (deal.shopify_product_id) {
-      shopifyProduct = await getProductById(deal.shopify_product_id);
+      shopifyProduct = await withTimeout(getProductById(deal.shopify_product_id), 5000);
     }
 
     if (!shopifyProduct) {
+      console.warn(`[ENRICH] No Shopify product found for deal ${deal.id}, using basic data`);
       return deal as EnrichedDeal;
     }
 
@@ -47,7 +57,7 @@ export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDea
       },
     };
   } catch (error) {
-    console.error('Error enriching deal with Shopify data:', error);
+    console.error(`[ENRICH] Error enriching deal ${deal.id}:`, error);
     return deal as EnrichedDeal;
   }
 }
