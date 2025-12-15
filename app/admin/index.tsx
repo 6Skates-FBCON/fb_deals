@@ -22,9 +22,11 @@ export default function AdminDashboard() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchDeals = useCallback(async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('deals')
         .select('*')
@@ -32,9 +34,11 @@ export default function AdminDashboard() {
 
       if (error) throw error;
       setDeals(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching deals:', error);
-      Alert.alert('Error', 'Failed to load deals');
+      const errorMessage = error?.message || 'Failed to load deals';
+      setError(errorMessage);
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -42,7 +46,16 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setError('Loading timeout. Please check your connection.');
+      }
+    }, 10000);
+
     fetchDeals();
+
+    return () => clearTimeout(timeout);
   }, [fetchDeals]);
 
   const handleRefresh = useCallback(() => {
@@ -60,23 +73,28 @@ export default function AdminDashboard() {
           try {
             const { error } = await supabase.from('deals').delete().eq('id', dealId);
 
-            if (error) throw error;
+            if (error) {
+              console.error('Delete error:', error);
+              throw new Error(error.message || 'Failed to delete deal');
+            }
 
             Alert.alert('Success', 'Deal deleted successfully');
             fetchDeals();
-          } catch (error) {
+          } catch (error: any) {
             console.error('Error deleting deal:', error);
-            Alert.alert('Error', 'Failed to delete deal');
+            const errorMessage = error?.message || 'Failed to delete deal. You may not have permission.';
+            Alert.alert('Delete Failed', errorMessage);
           }
         },
       },
     ]);
   };
 
-  if (loading) {
+  if (loading && !error) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading deals...</Text>
       </View>
     );
   }
@@ -92,6 +110,15 @@ export default function AdminDashboard() {
         <View style={styles.header}>
           <Text style={styles.subtitle}>Manage your flash deals</Text>
         </View>
+
+        {error && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorBannerText}>{error}</Text>
+            <TouchableOpacity onPress={fetchDeals} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {deals.length === 0 ? (
           <View style={styles.emptyState}>
@@ -183,6 +210,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.darkBg,
+    gap: Spacing.md,
+  },
+  loadingText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    marginTop: Spacing.md,
+  },
+  errorBanner: {
+    backgroundColor: '#EF4444',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  errorBannerText: {
+    ...Typography.body,
+    color: Colors.white,
+    flex: 1,
+  },
+  retryButton: {
+    backgroundColor: Colors.white,
+    paddingVertical: 6,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.sm,
+  },
+  retryButtonText: {
+    ...Typography.bodyBold,
+    color: '#EF4444',
+    fontSize: 12,
   },
   scrollView: {
     flex: 1,
