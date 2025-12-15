@@ -15,6 +15,7 @@ import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/Button';
 import { CountdownTimer } from '@/components/CountdownTimer';
+import { DealAvailability } from '@/components/DealAvailability';
 import { getDealStatus, formatPrice } from '@/utils/dealUtils';
 import { Deal, EnrichedDeal } from '@/types/deal';
 import { enrichDealWithShopifyData } from '@/utils/dealEnrichment';
@@ -165,20 +166,9 @@ export default function DealDetailScreen() {
             </Text>
           </View>
 
-          <View style={styles.detailsSection}>
-            <Text style={styles.sectionTitle}>Deal Details</Text>
-            <View style={styles.availabilityContainer}>
-              <Text style={styles.detailLabel}>Available:</Text>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: `${(deal.quantity_remaining / deal.quantity_total) * 100}%` }
-                  ]}
-                />
-              </View>
-            </View>
-          </View>
+          <DealAvailability
+            availabilityPercent={(deal.quantity_remaining / deal.quantity_total) * 100}
+          />
         </View>
       </ScrollView>
 
@@ -357,33 +347,6 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.white,
     lineHeight: 24,
-  },
-  detailsSection: {
-    marginTop: Spacing.lg,
-    backgroundColor: Colors.cardBg,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.xl,
-  },
-  availabilityContainer: {
-    gap: Spacing.sm,
-  },
-  detailLabel: {
-    ...Typography.body,
-    color: Colors.white,
-    marginBottom: Spacing.sm,
-  },
-  progressBarContainer: {
-    height: 24,
-    backgroundColor: Colors.darkBg,
-    borderRadius: BorderRadius.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
   },
   footer: {
     position: 'absolute',
