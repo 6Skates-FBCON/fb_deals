@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.captionBold,
-    color: Colors.textSecondary,
+    color: Colors.white,
     textAlign: 'center',
     marginBottom: Spacing.md,
     textTransform: 'uppercase',
