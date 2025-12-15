@@ -20,7 +20,7 @@ import { Button } from '@/components/Button';
 import { formatPrice } from '@/utils/dealUtils';
 import { Deal, EnrichedDeal } from '@/types/deal';
 import { enrichDealWithShopifyData } from '@/utils/dealEnrichment';
-import { createCheckout } from '@/lib/shopify';
+import { createCheckout, getFirstVariantId } from '@/lib/shopify';
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export default function CheckoutScreen() {
   }, [fetchDeal]);
 
   const handlePurchase = async () => {
-    if (!deal || !deal.shopifyProduct) {
+    if (!deal) {
       Alert.alert('Error', 'Product information not available');
       return;
     }
@@ -71,7 +71,17 @@ export default function CheckoutScreen() {
     setPurchasing(true);
 
     try {
-      const checkout = await createCheckout(deal.shopifyProduct.variantId, 1);
+      let variantId = deal.shopify_variant_id;
+
+      if (!variantId && deal.shopify_product_id) {
+        variantId = await getFirstVariantId(deal.shopify_product_id);
+      }
+
+      if (!variantId) {
+        throw new Error('Product variant not available');
+      }
+
+      const checkout = await createCheckout(variantId, 1);
 
       if (!checkout || !checkout.webUrl) {
         throw new Error('Failed to create checkout');

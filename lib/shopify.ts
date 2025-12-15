@@ -226,6 +226,19 @@ export async function getProductById(productId: string): Promise<ShopifyProduct 
   }
 }
 
+export async function getFirstVariantId(productId: string): Promise<string | null> {
+  try {
+    const product = await getProductById(productId);
+    if (!product || !product.variants.edges.length) {
+      return null;
+    }
+    return product.variants.edges[0].node.id;
+  } catch (error) {
+    console.error('Error getting first variant ID:', error);
+    return null;
+  }
+}
+
 export async function createCheckout(variantId: string, quantity: number = 1) {
   const query = `
     mutation checkoutCreate($input: CheckoutCreateInput!) {
