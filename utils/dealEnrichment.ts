@@ -7,6 +7,11 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
 }
 
 export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDeal> {
+  console.log('[ENRICH] Skipping Shopify enrichment for deal:', deal.id);
+  return deal as EnrichedDeal;
+
+  // Temporary: Shopify enrichment disabled for troubleshooting
+  /*
   try {
     if (!deal.shopify_handle && !deal.shopify_product_id) {
       return deal as EnrichedDeal;
@@ -15,9 +20,9 @@ export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDea
     let shopifyProduct: ShopifyProduct | null = null;
 
     if (deal.shopify_handle) {
-      shopifyProduct = await withTimeout(getProductByHandle(deal.shopify_handle), 5000);
+      shopifyProduct = await withTimeout(getProductByHandle(deal.shopify_handle), 3000);
     } else if (deal.shopify_product_id) {
-      shopifyProduct = await withTimeout(getProductById(deal.shopify_product_id), 5000);
+      shopifyProduct = await withTimeout(getProductById(deal.shopify_product_id), 3000);
     }
 
     if (!shopifyProduct) {
@@ -60,9 +65,25 @@ export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDea
     console.error(`[ENRICH] Error enriching deal ${deal.id}:`, error);
     return deal as EnrichedDeal;
   }
+  */
 }
 
 export async function enrichDealsWithShopifyData(deals: Deal[]): Promise<EnrichedDeal[]> {
-  const enrichedDeals = await Promise.all(deals.map((deal) => enrichDealWithShopifyData(deal)));
-  return enrichedDeals;
+  console.log('[ENRICH] Starting enrichment for', deals.length, 'deals');
+
+  const enrichedDeals = await Promise.allSettled(
+    deals.map((deal) => enrichDealWithShopifyData(deal))
+  );
+
+  const results = enrichedDeals.map((result, index) => {
+    if (result.status === 'fulfilled') {
+      return result.value;
+    } else {
+      console.error('[ENRICH] Failed to enrich deal:', deals[index].id, result.reason);
+      return deals[index] as EnrichedDeal;
+    }
+  });
+
+  console.log('[ENRICH] Enrichment complete, returning', results.length, 'deals');
+  return results;
 }
