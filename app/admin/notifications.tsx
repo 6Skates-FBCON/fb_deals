@@ -27,6 +27,8 @@ export default function AdminNotifications() {
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     type: 'announcement' as NotificationType,
@@ -68,6 +70,7 @@ export default function AdminNotifications() {
 
   const openCreateModal = () => {
     setEditingNotification(null);
+    setFormError(null);
     setFormData({
       type: 'announcement',
       title: '',
@@ -93,11 +96,24 @@ export default function AdminNotifications() {
   };
 
   const handleSave = async () => {
-    if (!formData.title.trim() || !formData.message.trim() || !formData.preview.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    setFormError(null);
+
+    if (!formData.title.trim()) {
+      setFormError('Please enter a title');
       return;
     }
 
+    if (!formData.preview.trim()) {
+      setFormError('Please enter a preview text');
+      return;
+    }
+
+    if (!formData.message.trim()) {
+      setFormError('Please enter a full message');
+      return;
+    }
+
+    setSaving(true);
     try {
       const notificationData = {
         type: formData.type,
@@ -116,6 +132,9 @@ export default function AdminNotifications() {
           .eq('id', editingNotification.id);
 
         if (error) throw error;
+
+        setModalVisible(false);
+        await fetchNotifications();
         Alert.alert('Success', 'Notification updated successfully');
       } else {
         const { error } = await supabase
@@ -123,14 +142,16 @@ export default function AdminNotifications() {
           .insert([notificationData]);
 
         if (error) throw error;
-        Alert.alert('Success', 'Notification created successfully');
-      }
 
-      setModalVisible(false);
-      fetchNotifications();
+        setModalVisible(false);
+        Alert.alert('Success', 'Notification created and is now visible to all users');
+        router.push('/(tabs)/notifications');
+      }
     } catch (error: any) {
       console.error('Error saving notification:', error);
-      Alert.alert('Error', error?.message || 'Failed to save notification');
+      setFormError(error?.message || 'Failed to save notification');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -303,6 +324,12 @@ export default function AdminNotifications() {
             </View>
 
             <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
+              {formError && (
+                <View style={styles.formErrorBanner}>
+                  <Text style={styles.formErrorText}>{formError}</Text>
+                </View>
+              )}
+
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Type</Text>
                 <View style={styles.typeButtons}>
@@ -378,10 +405,21 @@ export default function AdminNotifications() {
 
               <View style={styles.modalActions}>
                 <View style={styles.actionButtonContainer}>
-                  <Button title="Cancel" onPress={() => setModalVisible(false)} variant="secondary" fullWidth />
+                  <Button
+                    title="Cancel"
+                    onPress={() => setModalVisible(false)}
+                    variant="secondary"
+                    fullWidth
+                    disabled={saving}
+                  />
                 </View>
                 <View style={styles.actionButtonContainer}>
-                  <Button title={editingNotification ? 'Update' : 'Create'} onPress={handleSave} fullWidth />
+                  <Button
+                    title={saving ? 'Saving...' : (editingNotification ? 'Update' : 'Create')}
+                    onPress={handleSave}
+                    fullWidth
+                    disabled={saving}
+                  />
                 </View>
               </View>
             </ScrollView>
@@ -590,6 +628,17 @@ const styles = StyleSheet.create({
   },
   modalForm: {
     padding: Spacing.lg,
+  },
+  formErrorBanner: {
+    backgroundColor: '#EF4444',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
+  },
+  formErrorText: {
+    ...Typography.body,
+    color: Colors.white,
+    textAlign: 'center',
   },
   formGroup: {
     marginBottom: Spacing.lg,
