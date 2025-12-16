@@ -1,59 +1,62 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Bell, Package, Calendar, Megaphone } from 'lucide-react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { Bell, Calendar, Megaphone } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
-
-interface Notification {
-  id: number;
-  type: 'order' | 'event' | 'announcement' | 'general';
-  title: string;
-  preview: string;
-  time: string;
-  unread: boolean;
-}
+import { supabase } from '@/lib/supabase';
+import { Notification } from '@/types/notification';
 
 export default function NotificationsScreen() {
-  const notifications: Notification[] = [
-    {
-      id: 1,
-      type: 'order',
-      title: 'Order Shipped!',
-      preview: 'Your Limited Edition Tech Deck is on its way. Track your package...',
-      time: '2h ago',
-      unread: true,
-    },
-    {
-      id: 2,
-      type: 'event',
-      title: 'Friday Night Session',
-      preview: 'This Friday at 7 PM. Free entry, prizes for best trick!',
-      time: '5h ago',
-      unread: true,
-    },
-    {
-      id: 3,
-      type: 'announcement',
-      title: 'New Flash Deal Dropping Soon',
-      preview: 'Get ready! Tomorrow we\'re dropping an exclusive deck at 50% off...',
-      time: '1d ago',
-      unread: true,
-    },
-    {
-      id: 4,
-      type: 'general',
-      title: 'Welcome to 6Skates!',
-      preview: 'Thanks for joining the crew. Check out our latest deals and...',
-      time: '3d ago',
-      unread: true,
-    },
-  ];
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const getIcon = (type: string, unread: boolean) => {
-    const color = unread ? Colors.primary : Colors.midGrey;
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setError(null);
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('published_at', { ascending: false });
+
+      if (error) throw error;
+      setNotifications(data || []);
+    } catch (error: any) {
+      console.error('Error fetching notifications:', error);
+      setError(error?.message || 'Failed to load notifications');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
+  const getIcon = (type: string) => {
+    const color = Colors.primary;
     const size = 20;
 
     switch (type) {
-      case 'order':
-        return <Package size={size} color={color} />;
       case 'event':
         return <Calendar size={size} color={color} />;
       case 'announcement':
@@ -63,43 +66,78 @@ export default function NotificationsScreen() {
     }
   };
 
+  if (loading && !error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading notifications...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView showsVerticalScrollIndicator={false} style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={Colors.primary}
+        />
+      }
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Notifications</Text>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>4 new</Text>
+        {notifications.length > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{notifications.length} total</Text>
+          </View>
+        )}
+      </View>
+
+      {error && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{error}</Text>
         </View>
-      </View>
+      )}
 
-      <View style={styles.notificationsList}>
-        {notifications.map((notification) => (
-          <TouchableOpacity key={notification.id} style={styles.notificationCard} activeOpacity={0.8}>
-            <View style={[styles.iconContainer, notification.unread && styles.iconContainerUnread]}>
-              {getIcon(notification.type, notification.unread)}
-            </View>
-
-            <View style={styles.notificationContent}>
-              <View style={styles.notificationHeader}>
-                <Text style={[styles.notificationTitle, notification.unread && styles.notificationUnread]}>
-                  {notification.title}
-                </Text>
-                <Text style={styles.notificationTime}>{notification.time}</Text>
+      {notifications.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No Notifications</Text>
+          <Text style={styles.emptyText}>Check back later for updates about events and special drops</Text>
+        </View>
+      ) : (
+        <View style={styles.notificationsList}>
+          {notifications.map((notification) => (
+            <TouchableOpacity key={notification.id} style={styles.notificationCard} activeOpacity={0.8}>
+              <View style={styles.iconContainer}>
+                {getIcon(notification.type)}
               </View>
-              <Text style={styles.notificationPreview} numberOfLines={2}>
-                {notification.preview}
-              </Text>
-            </View>
 
-            {notification.unread && <View style={styles.unreadDot} />}
-          </TouchableOpacity>
-        ))}
-      </View>
+              <View style={styles.notificationContent}>
+                <View style={styles.notificationHeader}>
+                  <Text style={styles.notificationTitle}>
+                    {notification.title}
+                  </Text>
+                  <Text style={styles.notificationTime}>{getTimeAgo(notification.published_at)}</Text>
+                </View>
+                <Text style={styles.notificationPreview} numberOfLines={2}>
+                  {notification.preview}
+                </Text>
+              </View>
+
+              <View style={styles.unreadDot} />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       <View style={styles.infoBox}>
         <Text style={styles.infoTitle}>Stay in the Loop</Text>
         <Text style={styles.infoText}>
-          Get notified about flash deals, event updates, and order confirmations.
+          Get notified about flash deals, events, and exclusive drops.
         </Text>
       </View>
     </ScrollView>
@@ -113,6 +151,42 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: Spacing.lg,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.darkBg,
+  },
+  loadingText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    marginTop: Spacing.md,
+  },
+  errorBanner: {
+    backgroundColor: '#EF4444',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
+  },
+  errorBannerText: {
+    ...Typography.body,
+    color: Colors.white,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.xxl * 2,
+  },
+  emptyTitle: {
+    ...Typography.heading,
+    color: Colors.white,
+    marginBottom: Spacing.sm,
+  },
+  emptyText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -156,13 +230,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Colors.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
-  },
-  iconContainerUnread: {
-    backgroundColor: Colors.primary + '15',
   },
   notificationContent: {
     flex: 1,
@@ -178,9 +249,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     flex: 1,
     marginRight: Spacing.sm,
-  },
-  notificationUnread: {
-    color: Colors.primary,
   },
   notificationTime: {
     ...Typography.small,
