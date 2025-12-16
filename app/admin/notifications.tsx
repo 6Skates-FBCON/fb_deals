@@ -169,8 +169,9 @@ export default function AdminNotifications() {
               .eq('id', notificationId);
 
             if (error) throw error;
+
             Alert.alert('Success', 'Notification deleted successfully');
-            fetchNotifications();
+            router.push('/(tabs)/notifications');
           } catch (error: any) {
             console.error('Error deleting notification:', error);
             Alert.alert('Error', error?.message || 'Failed to delete notification');
@@ -555,7 +556,7 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.white,
     fontSize: 14,
   },
   detailValue: {
