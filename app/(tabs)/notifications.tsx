@@ -10,7 +10,6 @@ export default function NotificationsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -67,10 +66,6 @@ export default function NotificationsScreen() {
     }
   };
 
-  const toggleExpanded = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
   if (loading && !error) {
     return (
       <View style={styles.loadingContainer}>
@@ -115,41 +110,27 @@ export default function NotificationsScreen() {
         </View>
       ) : (
         <View style={styles.notificationsList}>
-          {notifications.map((notification) => {
-            const isExpanded = expandedId === notification.id;
-            return (
-              <TouchableOpacity
-                key={notification.id}
-                style={styles.notificationCard}
-                activeOpacity={0.8}
-                onPress={() => toggleExpanded(notification.id)}
-              >
-                <View style={styles.iconContainer}>
-                  {getIcon(notification.type)}
-                </View>
+          {notifications.map((notification) => (
+            <View key={notification.id} style={styles.notificationCard}>
+              <View style={styles.iconContainer}>
+                {getIcon(notification.type)}
+              </View>
 
-                <View style={styles.notificationContent}>
-                  <View style={styles.notificationHeader}>
-                    <Text style={styles.notificationTitle}>
-                      {notification.title}
-                    </Text>
-                    <Text style={styles.notificationTime}>{getTimeAgo(notification.published_at)}</Text>
-                  </View>
-                  {isExpanded ? (
-                    <Text style={styles.notificationMessage}>
-                      {notification.message}
-                    </Text>
-                  ) : (
-                    <Text style={styles.notificationPreview} numberOfLines={2}>
-                      {notification.preview}
-                    </Text>
-                  )}
+              <View style={styles.notificationContent}>
+                <View style={styles.notificationHeader}>
+                  <Text style={styles.notificationTitle}>
+                    {notification.title}
+                  </Text>
+                  <Text style={styles.notificationTime}>{getTimeAgo(notification.published_at)}</Text>
                 </View>
+                <Text style={styles.notificationMessage}>
+                  {notification.message}
+                </Text>
+              </View>
 
-                <View style={styles.unreadDot} />
-              </TouchableOpacity>
-            );
-          })}
+              <View style={styles.unreadDot} />
+            </View>
+          ))}
         </View>
       )}
 
@@ -272,11 +253,6 @@ const styles = StyleSheet.create({
   notificationTime: {
     ...Typography.small,
     color: Colors.midGrey,
-  },
-  notificationPreview: {
-    ...Typography.caption,
-    color: Colors.white,
-    lineHeight: 18,
   },
   notificationMessage: {
     ...Typography.caption,

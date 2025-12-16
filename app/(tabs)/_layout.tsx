@@ -71,7 +71,7 @@ export default function TabLayout() {
         options={{
           title: 'Notifications',
           tabBarIcon: ({ size, color }) => (
-            <TabBarIcon Icon={Bell} size={size} color={color} badge={4} />
+            <TabBarIcon Icon={Bell} size={size} color={color} />
           ),
         }}
       />
