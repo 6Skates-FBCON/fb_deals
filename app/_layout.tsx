@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 // 🔧 IMPORTANT: disable native screens to avoid the setSheetLargestUndimmedDetent crash
@@ -54,19 +55,21 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <RootErrorBoundary>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="auth" options={{ headerShown: false }} />
-          <Stack.Screen name="admin" options={{ headerShown: false }} />
-          <Stack.Screen name="deal/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="checkout/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="success/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="error/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="light" />
-      </RootErrorBoundary>
+      <NotificationProvider>
+        <RootErrorBoundary>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+            <Stack.Screen name="admin" options={{ headerShown: false }} />
+            <Stack.Screen name="deal/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="checkout/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="success/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="error/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="light" />
+        </RootErrorBoundary>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

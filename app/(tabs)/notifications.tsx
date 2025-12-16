@@ -4,12 +4,15 @@ import { Bell, Calendar, Megaphone } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Notification } from '@/types/notification';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { markAllAsRead } = useNotifications();
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -33,6 +36,12 @@ export default function NotificationsScreen() {
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
+
+  useFocusEffect(
+    useCallback(() => {
+      markAllAsRead();
+    }, [markAllAsRead])
+  );
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);

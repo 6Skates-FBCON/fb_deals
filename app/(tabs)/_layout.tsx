@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Linking, TouchableOpacity } from 'react-native';
 import { ShoppingBag, MapPin, ClipboardList, Bell, UserCircle, Globe } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 function TabBarIcon({ Icon, color, size, badge }: { Icon: any; color: string; size: number; badge?: number }) {
   return (
@@ -17,6 +18,8 @@ function TabBarIcon({ Icon, color, size, badge }: { Icon: any; color: string; si
 }
 
 export default function TabLayout() {
+  const { unreadCount } = useNotifications();
+
   return (
     <Tabs
       screenOptions={{
@@ -71,7 +74,7 @@ export default function TabLayout() {
         options={{
           title: 'Notifications',
           tabBarIcon: ({ size, color }) => (
-            <TabBarIcon Icon={Bell} size={size} color={color} />
+            <TabBarIcon Icon={Bell} size={size} color={color} badge={unreadCount} />
           ),
         }}
       />

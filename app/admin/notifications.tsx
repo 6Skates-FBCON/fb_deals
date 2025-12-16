@@ -18,9 +18,11 @@ import { supabase } from '@/lib/supabase';
 import { Notification, NotificationType } from '@/types/notification';
 import { Button } from '@/components/Button';
 import { DateTimePicker } from '@/components/DateTimePicker';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function AdminNotifications() {
   const router = useRouter();
+  const { refreshUnreadCount } = useNotifications();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -135,6 +137,7 @@ export default function AdminNotifications() {
 
         setModalVisible(false);
         await fetchNotifications();
+        await refreshUnreadCount();
         Alert.alert('Success', 'Notification updated successfully');
       } else {
         const { error } = await supabase
@@ -144,6 +147,7 @@ export default function AdminNotifications() {
         if (error) throw error;
 
         setModalVisible(false);
+        await refreshUnreadCount();
         Alert.alert('Success', 'Notification created and is now visible to all users');
         router.push('/(tabs)/notifications');
       }
@@ -175,6 +179,7 @@ export default function AdminNotifications() {
       }
 
       console.log('Notification deleted successfully');
+      await refreshUnreadCount();
       router.push('/(tabs)/notifications');
     } catch (error: any) {
       console.error('Error deleting notification:', error);
