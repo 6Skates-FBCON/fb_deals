@@ -10,7 +10,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Plus, Edit2, Trash2, Bell } from 'lucide-react-native';
+import { Plus, Edit2, Trash2 } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Deal } from '@/types/deal';
@@ -110,14 +110,6 @@ export default function AdminDashboard() {
         <View style={styles.header}>
           <Text style={styles.subtitle}>Manage your flash deals</Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.quickActionButton}
-          onPress={() => router.push('/admin/notifications')}
-        >
-          <Bell size={20} color={Colors.white} />
-          <Text style={styles.quickActionText}>Manage Notifications</Text>
-        </TouchableOpacity>
 
         {error && (
           <View style={styles.errorBanner}>
@@ -258,29 +250,11 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   header: {
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xl,
   },
   subtitle: {
     ...Typography.body,
     color: Colors.textSecondary,
-  },
-  quickActionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.accent,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.xl,
-    gap: Spacing.sm,
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
-  quickActionText: {
-    ...Typography.bodyBold,
-    color: Colors.white,
-    fontSize: 16,
   },
   emptyState: {
     alignItems: 'center',

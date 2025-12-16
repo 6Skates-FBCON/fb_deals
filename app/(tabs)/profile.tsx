@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput 
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
-import { User, Mail, LogOut, Lock, ChevronRight, Calendar, Settings } from 'lucide-react-native';
+import { User, Mail, LogOut, Lock, ChevronRight, Calendar, Settings, Bell } from 'lucide-react-native';
 import { Button } from '@/components/Button';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -130,19 +130,35 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Admin</Text>
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push('/admin')}
-          >
-            <View style={styles.iconContainer}>
-              <Settings size={20} color={Colors.primary} strokeWidth={2} />
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Deal Management</Text>
-              <Text style={styles.actionSubtitle}>Add and manage flash deals</Text>
-            </View>
-            <ChevronRight size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
+          <View style={styles.adminButtonGroup}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push('/admin')}
+            >
+              <View style={styles.iconContainer}>
+                <Settings size={20} color={Colors.primary} strokeWidth={2} />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={styles.actionTitle}>Deal Management</Text>
+                <Text style={styles.actionSubtitle}>Add and manage flash deals</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push('/admin/notifications')}
+            >
+              <View style={styles.iconContainer}>
+                <Bell size={20} color={Colors.primary} strokeWidth={2} />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={styles.actionTitle}>Notification Management</Text>
+                <Text style={styles.actionSubtitle}>Send updates about events and drops</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
@@ -313,6 +329,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.border,
     marginVertical: Spacing.sm,
+  },
+  adminButtonGroup: {
+    gap: Spacing.md,
   },
   actionButton: {
     flexDirection: 'row',
