@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
   },
   typeButtonText: {
     ...Typography.bodyBold,
-    color: Colors.textSecondary,
+    color: Colors.white,
     textTransform: 'capitalize',
   },
   typeButtonTextActive: {
