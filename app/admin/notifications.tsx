@@ -156,29 +156,31 @@ export default function AdminNotifications() {
   };
 
   const handleDelete = async (notificationId: string) => {
-    Alert.alert('Delete Notification', 'Are you sure you want to delete this notification?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const { error } = await supabase
-              .from('notifications')
-              .delete()
-              .eq('id', notificationId);
+    const confirmed = confirm('Are you sure you want to delete this notification? This cannot be undone.');
 
-            if (error) throw error;
+    if (!confirmed) return;
 
-            Alert.alert('Success', 'Notification deleted successfully');
-            router.push('/(tabs)/notifications');
-          } catch (error: any) {
-            console.error('Error deleting notification:', error);
-            Alert.alert('Error', error?.message || 'Failed to delete notification');
-          }
-        },
-      },
-    ]);
+    setLoading(true);
+    try {
+      console.log('Deleting notification:', notificationId);
+
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId);
+
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+
+      console.log('Notification deleted successfully');
+      router.push('/(tabs)/notifications');
+    } catch (error: any) {
+      console.error('Error deleting notification:', error);
+      setError(error?.message || 'Failed to delete notification');
+      setLoading(false);
+    }
   };
 
   const getIcon = (type: NotificationType) => {
