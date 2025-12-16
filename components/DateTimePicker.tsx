@@ -1,60 +1,44 @@
 import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { Button } from './Button';
 
 interface DateTimePickerProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
+  value: Date;
+  onChange: (value: Date) => void;
+  mode?: 'date' | 'time' | 'datetime';
+  nullable?: boolean;
+  onClear?: () => void;
 }
 
-export function DateTimePicker({ label, value, onChange, placeholder }: DateTimePickerProps) {
+export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = false, onClear }: DateTimePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState({ hour: '00', minute: '00' });
-
-  const parseDateTime = (dateTimeString: string) => {
-    if (!dateTimeString) return null;
-    try {
-      return new Date(dateTimeString);
-    } catch {
-      return null;
-    }
-  };
+  const [currentMonth, setCurrentMonth] = useState(value || new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(value || new Date());
+  const [selectedTime, setSelectedTime] = useState({
+    hour: (value?.getHours() || 0).toString().padStart(2, '0'),
+    minute: (value?.getMinutes() || 0).toString().padStart(2, '0'),
+  });
 
   const openPicker = () => {
-    const parsedDate = parseDateTime(value);
-    if (parsedDate) {
-      setSelectedDate(parsedDate);
-      setCurrentMonth(parsedDate);
-      setSelectedTime({
-        hour: parsedDate.getHours().toString().padStart(2, '0'),
-        minute: parsedDate.getMinutes().toString().padStart(2, '0'),
-      });
-    } else {
-      const now = new Date();
-      setSelectedDate(now);
-      setCurrentMonth(now);
-      setSelectedTime({
-        hour: now.getHours().toString().padStart(2, '0'),
-        minute: now.getMinutes().toString().padStart(2, '0'),
-      });
-    }
+    const dateToUse = value || new Date();
+    setSelectedDate(dateToUse);
+    setCurrentMonth(dateToUse);
+    setSelectedTime({
+      hour: dateToUse.getHours().toString().padStart(2, '0'),
+      minute: dateToUse.getMinutes().toString().padStart(2, '0'),
+    });
     setShowPicker(true);
   };
 
   const handleConfirm = () => {
-    if (selectedDate) {
-      const year = selectedDate.getFullYear();
-      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const day = String(selectedDate.getDate()).padStart(2, '0');
-      const dateTimeString = `${year}-${month}-${day} ${selectedTime.hour}:${selectedTime.minute}:00`;
-      onChange(dateTimeString);
-    }
+    const newDate = new Date(selectedDate);
+    newDate.setHours(parseInt(selectedTime.hour));
+    newDate.setMinutes(parseInt(selectedTime.minute));
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    onChange(newDate);
     setShowPicker(false);
   };
 
@@ -63,24 +47,21 @@ export function DateTimePicker({ label, value, onChange, placeholder }: DateTime
   };
 
   const handleRemove = () => {
-    onChange('');
+    if (onClear) {
+      onClear();
+    }
     setShowPicker(false);
   };
 
-  const formatDisplayValue = (dateTimeString: string) => {
-    if (!dateTimeString) return '';
-    try {
-      const date = new Date(dateTimeString);
-      return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch {
-      return dateTimeString;
-    }
+  const formatDisplayValue = (date: Date | null) => {
+    if (!date) return 'Not set';
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const previousMonth = () => {
@@ -142,15 +123,17 @@ export function DateTimePicker({ label, value, onChange, placeholder }: DateTime
 
   return (
     <>
-      <View style={styles.container}>
-        <Text style={styles.label}>{label}</Text>
-        <TouchableOpacity style={styles.input} onPress={openPicker}>
-          <Calendar size={20} color={Colors.textSecondary} />
-          <Text style={[styles.inputText, !value && styles.placeholder]}>
-            {value ? formatDisplayValue(value) : placeholder || 'Select date & time'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.input} onPress={openPicker}>
+        <Calendar size={20} color={Colors.textSecondary} />
+        <Text style={styles.inputText}>
+          {formatDisplayValue(value)}
+        </Text>
+        {nullable && value && onClear && (
+          <TouchableOpacity onPress={onClear} style={styles.clearButton}>
+            <X size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
 
       <Modal visible={showPicker} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
@@ -255,9 +238,11 @@ export function DateTimePicker({ label, value, onChange, placeholder }: DateTime
             </View>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={handleRemove}>
-                <Text style={styles.removeText}>Remove schedule</Text>
-              </TouchableOpacity>
+              {nullable && onClear && (
+                <TouchableOpacity onPress={handleRemove}>
+                  <Text style={styles.removeText}>Clear</Text>
+                </TouchableOpacity>
+              )}
               <View style={styles.actionButtons}>
                 <Button title="Cancel" onPress={handleCancel} variant="secondary" />
                 <Button title="Done" onPress={handleConfirm} />
@@ -271,14 +256,6 @@ export function DateTimePicker({ label, value, onChange, placeholder }: DateTime
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: Spacing.md,
-  },
-  label: {
-    ...Typography.bodyBold,
-    color: Colors.white,
-    marginBottom: Spacing.sm,
-  },
   input: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -294,8 +271,8 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.white,
   },
-  placeholder: {
-    color: Colors.midGrey,
+  clearButton: {
+    padding: 4,
   },
   modalOverlay: {
     flex: 1,
