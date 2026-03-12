@@ -45,7 +45,7 @@ try {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: Platform.OS === 'web',
       storage: Platform.OS === 'web' ? window.localStorage : AsyncStorage,
     },
   });

@@ -1,11 +1,12 @@
 // app/_layout.tsx
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { supabase } from '@/lib/supabase';
 
 // 🔧 IMPORTANT: disable native screens to avoid the setSheetLargestUndimmedDetent crash
 import { enableScreens } from 'react-native-screens';
@@ -50,6 +51,21 @@ class RootErrorBoundary extends React.Component<
   }
 }
 
+function PasswordRecoveryHandler() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        router.replace('/auth/update-password');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return null;
+}
+
 export default function RootLayout() {
   useFrameworkReady();
 
@@ -57,6 +73,7 @@ export default function RootLayout() {
     <AuthProvider>
       <NotificationProvider>
         <RootErrorBoundary>
+          <PasswordRecoveryHandler />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="auth" options={{ headerShown: false }} />

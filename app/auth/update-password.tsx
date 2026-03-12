@@ -1,59 +1,81 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
 
-export default function ForgotPasswordScreen() {
-  const [email, setEmail] = useState('');
+export default function UpdatePasswordScreen() {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  const handleReset = async () => {
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setSessionReady(true);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSessionReady(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleUpdatePassword = async () => {
     setError('');
 
-    if (!email.trim()) {
-      setError('Email is required');
+    if (!password) {
+      setError('Password is required');
       return;
     }
-    if (!email.includes('@')) {
-      setError('Please enter a valid email');
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
-
-    const redirectTo =
-      Platform.OS === 'web'
-        ? `${window.location.origin}/auth/update-password`
-        : 'myapp://auth/update-password';
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
     setLoading(true);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo,
-    });
+    const { error: updateError } = await supabase.auth.updateUser({ password });
     setLoading(false);
 
-    if (resetError) {
-      setError(resetError.message);
+    if (updateError) {
+      setError(updateError.message);
     } else {
       setSuccess(true);
     }
   };
 
+  if (!sessionReady) {
+    return (
+      <View style={styles.centeredContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.waitingText}>Verifying reset link...</Text>
+      </View>
+    );
+  }
+
   if (success) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.successCard}>
-          <Text style={styles.successTitle}>Check your email</Text>
+          <Text style={styles.successTitle}>Password updated!</Text>
           <Text style={styles.successText}>
-            We sent a password reset link to{' '}
-            <Text style={styles.emailHighlight}>{email}</Text>.
-            {'\n\n'}Open the link in your email to set a new password.
+            Your password has been changed successfully. You can now log in with your new password.
           </Text>
           <Button
-            title="Back to Login"
+            title="Go to Login"
             onPress={() => router.replace('/auth/login')}
             style={styles.button}
           />
@@ -65,10 +87,8 @@ export default function ForgotPasswordScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
-        <Text style={styles.title}>Reset Password</Text>
-        <Text style={styles.subtitle}>
-          Enter your email and we'll send you a link to reset your password.
-        </Text>
+        <Text style={styles.title}>Set New Password</Text>
+        <Text style={styles.subtitle}>Choose a strong password for your account.</Text>
       </View>
 
       {error ? (
@@ -79,32 +99,39 @@ export default function ForgotPasswordScreen() {
 
       <View style={styles.form}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>New Password</Text>
           <TextInput
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter new password"
             placeholderTextColor="rgba(255,255,255,0.4)"
+            secureTextEntry
             autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
+            autoComplete="new-password"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm New Password</Text>
+          <TextInput
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Confirm new password"
+            placeholderTextColor="rgba(255,255,255,0.4)"
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete="new-password"
           />
         </View>
 
         <Button
-          title={loading ? 'Sending...' : 'Send Reset Link'}
-          onPress={handleReset}
+          title={loading ? 'Updating...' : 'Update Password'}
+          onPress={handleUpdatePassword}
           disabled={loading}
           style={styles.button}
         />
-      </View>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Remember your password?</Text>
-        <TouchableOpacity onPress={() => router.replace('/auth/login')}>
-          <Text style={styles.link}>Log In</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -119,6 +146,17 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     paddingTop: 80,
   },
+  centeredContainer: {
+    flex: 1,
+    backgroundColor: Colors.darkBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  waitingText: {
+    ...Typography.body,
+    color: 'rgba(255,255,255,0.6)',
+  },
   header: {
     marginBottom: Spacing.xl,
   },
@@ -130,7 +168,6 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.body,
     color: 'rgba(255,255,255,0.6)',
-    lineHeight: 22,
   },
   errorContainer: {
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -168,21 +205,6 @@ const styles = StyleSheet.create({
   button: {
     marginTop: Spacing.lg,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  footerText: {
-    ...Typography.body,
-    color: 'rgba(255,255,255,0.6)',
-  },
-  link: {
-    ...Typography.body,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
   successCard: {
     backgroundColor: Colors.cardBg,
     borderRadius: 16,
@@ -199,9 +221,5 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     lineHeight: 22,
     marginBottom: Spacing.xl,
-  },
-  emailHighlight: {
-    color: Colors.primary,
-    fontWeight: '600',
   },
 });
