@@ -1,61 +1,69 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
   const router = useRouter();
 
-  const validateInputs = () => {
+  const handleReset = async () => {
+    setError('');
+
     if (!email.trim()) {
       setError('Email is required');
-      return false;
+      return;
     }
     if (!email.includes('@')) {
       setError('Please enter a valid email');
-      return false;
-    }
-    if (!password) {
-      setError('Password is required');
-      return false;
-    }
-    return true;
-  };
-
-  const handleLogin = async () => {
-    setError('');
-
-    if (!validateInputs()) {
       return;
     }
 
     setLoading(true);
-    const { error: signInError } = await signIn(email, password);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: 'myapp://auth/update-password',
+    });
     setLoading(false);
 
-    if (signInError) {
-      if (signInError.message.includes('Invalid login credentials')) {
-        setError('Invalid email or password');
-      } else {
-        setError(signInError.message);
-      }
+    if (resetError) {
+      setError(resetError.message);
     } else {
-      router.replace('/(tabs)');
+      setSuccess(true);
     }
   };
+
+  if (success) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.successCard}>
+          <Text style={styles.successTitle}>Check your email</Text>
+          <Text style={styles.successText}>
+            We sent a password reset link to{' '}
+            <Text style={styles.emailHighlight}>{email}</Text>.
+            {'\n\n'}Open the link in your email to set a new password.
+          </Text>
+          <Button
+            title="Back to Login"
+            onPress={() => router.replace('/auth/login')}
+            style={styles.button}
+          />
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Log in to continue finding deals</Text>
+        <Text style={styles.title}>Reset Password</Text>
+        <Text style={styles.subtitle}>
+          Enter your email and we'll send you a link to reset your password.
+        </Text>
       </View>
 
       {error ? (
@@ -72,43 +80,25 @@ export default function LoginScreen() {
             value={email}
             onChangeText={setEmail}
             placeholder="Enter your email"
-            placeholderTextColor={Colors.white}
+            placeholderTextColor="rgba(255,255,255,0.4)"
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            placeholderTextColor={Colors.white}
-            secureTextEntry
-            autoCapitalize="none"
-            autoComplete="password"
-          />
-        </View>
-
-        <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/auth/forgot-password')}>
-          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-        </TouchableOpacity>
-
         <Button
-          title={loading ? 'Logging In...' : 'Log In'}
-          onPress={handleLogin}
+          title={loading ? 'Sending...' : 'Send Reset Link'}
+          onPress={handleReset}
           disabled={loading}
           style={styles.button}
         />
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => router.replace('/auth/signup')}>
-          <Text style={styles.link}>Create an account</Text>
+        <Text style={styles.footerText}>Remember your password?</Text>
+        <TouchableOpacity onPress={() => router.replace('/auth/login')}>
+          <Text style={styles.link}>Log In</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -134,7 +124,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: 'rgba(255,255,255,0.6)',
+    lineHeight: 22,
   },
   errorContainer: {
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -163,7 +154,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.cardBg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.1)',
     borderRadius: 8,
     padding: Spacing.md,
     color: Colors.white,
@@ -171,15 +162,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: Spacing.lg,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: Spacing.sm,
-  },
-  forgotPasswordText: {
-    ...Typography.caption,
-    color: Colors.primary,
-    fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',
@@ -189,10 +171,31 @@ const styles = StyleSheet.create({
   },
   footerText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: 'rgba(255,255,255,0.6)',
   },
   link: {
     ...Typography.body,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  successCard: {
+    backgroundColor: Colors.cardBg,
+    borderRadius: 16,
+    padding: Spacing.xl,
+    marginTop: 40,
+  },
+  successTitle: {
+    ...Typography.title,
+    color: Colors.white,
+    marginBottom: Spacing.md,
+  },
+  successText: {
+    ...Typography.body,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 22,
+    marginBottom: Spacing.xl,
+  },
+  emailHighlight: {
     color: Colors.primary,
     fontWeight: '600',
   },
