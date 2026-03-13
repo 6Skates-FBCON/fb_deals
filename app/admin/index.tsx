@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Edit2, Trash2, X, Check } from 'lucide-react-native';
+import { CreditCard as Edit2, Trash2, X, Check } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Deal } from '@/types/deal';
