@@ -6,11 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Plus, Edit2, Trash2 } from 'lucide-react-native';
+import { Edit2, Trash2, X, Check } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Deal } from '@/types/deal';
@@ -23,6 +22,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchDeals = useCallback(async () => {
     try {
@@ -63,31 +64,20 @@ export default function AdminDashboard() {
     fetchDeals();
   }, [fetchDeals]);
 
-  const handleDelete = async (dealId: string) => {
-    Alert.alert('Delete Deal', 'Are you sure you want to delete this deal?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const { error } = await supabase.from('deals').delete().eq('id', dealId);
-
-            if (error) {
-              console.error('Delete error:', error);
-              throw new Error(error.message || 'Failed to delete deal');
-            }
-
-            Alert.alert('Success', 'Deal deleted successfully');
-            fetchDeals();
-          } catch (error: any) {
-            console.error('Error deleting deal:', error);
-            const errorMessage = error?.message || 'Failed to delete deal. You may not have permission.';
-            Alert.alert('Delete Failed', errorMessage);
-          }
-        },
-      },
-    ]);
+  const handleDeleteConfirm = async () => {
+    if (!confirmDeleteId) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from('deals').delete().eq('id', confirmDeleteId);
+      if (error) throw new Error(error.message || 'Failed to delete deal');
+      setConfirmDeleteId(null);
+      fetchDeals();
+    } catch (err: any) {
+      console.error('Error deleting deal:', err);
+      setError(err?.message || 'Failed to delete deal. You may not have permission.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (loading && !error) {
@@ -166,21 +156,52 @@ export default function AdminDashboard() {
                   </View>
 
                   <View style={styles.dealActions}>
-                    <TouchableOpacity
-                      style={[styles.actionButton, styles.editButton]}
-                      onPress={() => router.push(`/admin/edit-deal/${deal.id}`)}
-                    >
-                      <Edit2 size={16} color={Colors.white} />
-                      <Text style={styles.actionButtonText}>Edit</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.actionButton, styles.deleteButton]}
-                      onPress={() => handleDelete(deal.id)}
-                    >
-                      <Trash2 size={16} color={Colors.white} />
-                      <Text style={styles.actionButtonText}>Delete</Text>
-                    </TouchableOpacity>
+                    {confirmDeleteId === deal.id ? (
+                      <>
+                        <View style={styles.confirmPrompt}>
+                          <Text style={styles.confirmText}>Delete this deal?</Text>
+                        </View>
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.cancelButton]}
+                          onPress={() => setConfirmDeleteId(null)}
+                          disabled={deleting}
+                        >
+                          <X size={16} color={Colors.white} />
+                          <Text style={styles.actionButtonText}>No</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.deleteButton]}
+                          onPress={handleDeleteConfirm}
+                          disabled={deleting}
+                        >
+                          {deleting ? (
+                            <ActivityIndicator size="small" color={Colors.white} />
+                          ) : (
+                            <>
+                              <Check size={16} color={Colors.white} />
+                              <Text style={styles.actionButtonText}>Yes</Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <>
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.editButton]}
+                          onPress={() => router.push(`/admin/edit-deal/${deal.id}`)}
+                        >
+                          <Edit2 size={16} color={Colors.white} />
+                          <Text style={styles.actionButtonText}>Edit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.deleteButton]}
+                          onPress={() => setConfirmDeleteId(deal.id)}
+                        >
+                          <Trash2 size={16} color={Colors.white} />
+                          <Text style={styles.actionButtonText}>Delete</Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
                   </View>
                 </View>
               );
@@ -361,6 +382,18 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: '#EF4444',
+  },
+  cancelButton: {
+    backgroundColor: Colors.charcoal,
+  },
+  confirmPrompt: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  confirmText: {
+    ...Typography.body,
+    color: Colors.white,
+    fontSize: 13,
   },
   actionButtonText: {
     ...Typography.bodyBold,
