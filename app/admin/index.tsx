@@ -47,16 +47,7 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setError('Loading timeout. Please check your connection.');
-      }
-    }, 10000);
-
     fetchDeals();
-
-    return () => clearTimeout(timeout);
   }, [fetchDeals]);
 
   const handleRefresh = useCallback(() => {
