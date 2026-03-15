@@ -5,24 +5,27 @@ import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { Button } from './Button';
 
 interface DateTimePickerProps {
-  value: Date;
+  value: Date | null;
   onChange: (value: Date) => void;
   mode?: 'date' | 'time' | 'datetime';
   nullable?: boolean;
   onClear?: () => void;
+  label?: string;
+  placeholder?: string;
 }
 
-export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = false, onClear }: DateTimePickerProps) {
+export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = false, onClear, label, placeholder }: DateTimePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(value || new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(value || new Date());
+  const safeValue = value instanceof Date ? value : null;
+  const [currentMonth, setCurrentMonth] = useState(safeValue || new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(safeValue || new Date());
   const [selectedTime, setSelectedTime] = useState({
-    hour: (value?.getHours() || 0).toString().padStart(2, '0'),
-    minute: (value?.getMinutes() || 0).toString().padStart(2, '0'),
+    hour: (safeValue ? safeValue.getHours() : 0).toString().padStart(2, '0'),
+    minute: (safeValue ? safeValue.getMinutes() : 0).toString().padStart(2, '0'),
   });
 
   const openPicker = () => {
-    const dateToUse = value || new Date();
+    const dateToUse = safeValue || new Date();
     setSelectedDate(dateToUse);
     setCurrentMonth(dateToUse);
     setSelectedTime({
@@ -54,7 +57,7 @@ export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = 
   };
 
   const formatDisplayValue = (date: Date | null) => {
-    if (!date) return 'Not set';
+    if (!date) return placeholder || 'Not set';
     return date.toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -123,12 +126,13 @@ export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = 
 
   return (
     <>
+      {label && <Text style={styles.label}>{label}</Text>}
       <TouchableOpacity style={styles.input} onPress={openPicker}>
         <Calendar size={20} color={Colors.textSecondary} />
-        <Text style={styles.inputText}>
-          {formatDisplayValue(value)}
+        <Text style={[styles.inputText, !safeValue && styles.placeholderText]}>
+          {formatDisplayValue(safeValue)}
         </Text>
-        {nullable && value && onClear && (
+        {nullable && safeValue && onClear && (
           <TouchableOpacity onPress={onClear} style={styles.clearButton}>
             <X size={20} color={Colors.textSecondary} />
           </TouchableOpacity>
@@ -256,6 +260,11 @@ export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = 
 }
 
 const styles = StyleSheet.create({
+  label: {
+    ...Typography.bodyBold,
+    color: Colors.white,
+    marginBottom: Spacing.sm,
+  },
   input: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -265,11 +274,15 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   inputText: {
     flex: 1,
     ...Typography.body,
     color: Colors.white,
+  },
+  placeholderText: {
+    color: Colors.textSecondary,
   },
   clearButton: {
     padding: 4,

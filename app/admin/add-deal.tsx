@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Calendar, Search } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/Button';
@@ -31,8 +31,8 @@ export default function AddDealScreen() {
   const [regularPrice, setRegularPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
   const [quantityTotal, setQuantityTotal] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [shopifyHandle, setShopifyHandle] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<ShopifyProduct | null>(null);
 
@@ -131,13 +131,6 @@ export default function AddDealScreen() {
     setLoading(true);
 
     try {
-      console.log('[ADD DEAL] Attempting to create deal:', {
-        title: title.trim(),
-        shopifyHandle,
-        startDate,
-        endDate,
-      });
-
       const { data, error } = await supabase
         .from('deals')
         .insert({
@@ -148,8 +141,8 @@ export default function AddDealScreen() {
           sale_price: salePriceNum,
           quantity_total: parseInt(quantityTotal),
           quantity_remaining: parseInt(quantityTotal),
-          start_date: new Date(startDate).toISOString(),
-          end_date: new Date(endDate).toISOString(),
+          start_date: startDate!.toISOString(),
+          end_date: endDate!.toISOString(),
           shopify_handle: shopifyHandle,
           shopify_product_id: selectedProduct?.id || '',
         })

@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Calendar, Search } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/Button';
@@ -37,8 +37,8 @@ export default function EditDealScreen() {
   const [salePrice, setSalePrice] = useState('');
   const [quantityTotal, setQuantityTotal] = useState('');
   const [quantityRemaining, setQuantityRemaining] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [shopifyHandle, setShopifyHandle] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<ShopifyProduct | null>(null);
 
@@ -69,8 +69,8 @@ export default function EditDealScreen() {
         setSalePrice(data.sale_price.toString());
         setQuantityTotal(data.quantity_total.toString());
         setQuantityRemaining(data.quantity_remaining.toString());
-        setStartDate(new Date(data.start_date).toISOString().slice(0, 19).replace('T', ' '));
-        setEndDate(new Date(data.end_date).toISOString().slice(0, 19).replace('T', ' '));
+        setStartDate(new Date(data.start_date));
+        setEndDate(new Date(data.end_date));
         setShopifyHandle(data.shopify_handle);
       }
     } catch (error) {
@@ -166,8 +166,8 @@ export default function EditDealScreen() {
           sale_price: salePriceNum,
           quantity_total: parseInt(quantityTotal),
           quantity_remaining: parseInt(quantityRemaining),
-          start_date: new Date(startDate).toISOString(),
-          end_date: new Date(endDate).toISOString(),
+          start_date: startDate!.toISOString(),
+          end_date: endDate!.toISOString(),
           shopify_handle: shopifyHandle,
           shopify_product_id: selectedProduct?.id || deal.shopify_product_id,
         })
