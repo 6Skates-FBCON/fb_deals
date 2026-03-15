@@ -1,16 +1,17 @@
 // app/_layout.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { supabase } from '@/lib/supabase';
-
-// 🔧 IMPORTANT: disable native screens to avoid the setSheetLargestUndimmedDetent crash
 import { enableScreens } from 'react-native-screens';
-enableScreens(false);
+
+if (Platform.OS !== 'web') {
+  enableScreens(false);
+}
 
 class RootErrorBoundary extends React.Component<
   { children: React.ReactNode },

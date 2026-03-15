@@ -76,15 +76,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
+    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       if (!mounted) return;
 
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
       if (currentSession?.user) {
-        const adminStatus = await checkAdminStatus(currentSession.user.id);
-        if (mounted) setIsAdmin(adminStatus);
+        (async () => {
+          const adminStatus = await checkAdminStatus(currentSession.user.id);
+          if (mounted) setIsAdmin(adminStatus);
+        })();
       } else {
         setIsAdmin(false);
       }

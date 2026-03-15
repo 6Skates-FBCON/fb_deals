@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { Platform, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { useRouter } from 'expo-router';
+import { router as expoRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { registerForPushNotifications, savePushToken } from '@/lib/pushNotifications';
 
@@ -21,7 +21,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
-  const router = useRouter();
 
   const refreshUnreadCount = async () => {
     try {
@@ -96,14 +95,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const actionType = data?.push_action_type as string | undefined;
       const actionTarget = data?.push_action_target as string | undefined;
 
-      if (actionType === 'url' && actionTarget) {
-        Linking.openURL(actionTarget);
-      } else if (actionType === 'deal' && actionTarget) {
-        router.push(`/deal/${actionTarget}` as any);
-      } else if (actionType === 'tab' && actionTarget) {
-        router.push(`/(tabs)/${actionTarget}` as any);
-      } else {
-        router.push('/(tabs)/notifications');
+      try {
+        if (actionType === 'url' && actionTarget) {
+          Linking.openURL(actionTarget);
+        } else if (actionType === 'deal' && actionTarget) {
+          expoRouter.push(`/deal/${actionTarget}` as any);
+        } else if (actionType === 'tab' && actionTarget) {
+          expoRouter.push(`/(tabs)/${actionTarget}` as any);
+        } else {
+          expoRouter.push('/(tabs)/notifications');
+        }
+      } catch (e) {
+        console.warn('[Notifications] Router not ready for navigation:', e);
       }
     });
 
