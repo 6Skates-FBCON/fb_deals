@@ -12,10 +12,10 @@ import {
   Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Plus, Edit2, Trash2, X, Calendar, Megaphone, Bell } from 'lucide-react-native';
+import { Plus, Edit2, Trash2, X, Calendar, Megaphone, Bell, Send } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
-import { Notification, NotificationType } from '@/types/notification';
+import { Notification, NotificationType, PushActionType } from '@/types/notification';
 import { Button } from '@/components/Button';
 import { DateTimePicker } from '@/components/DateTimePicker';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -31,6 +31,15 @@ export default function AdminNotifications() {
   const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [sendingPushId, setSendingPushId] = useState<string | null>(null);
+
+  const TAB_OPTIONS = [
+    { value: 'index', label: 'Deals' },
+    { value: 'notifications', label: 'Notifications' },
+    { value: 'orders', label: 'Orders' },
+    { value: 'location', label: 'Location' },
+    { value: 'profile', label: 'Profile' },
+  ];
 
   const [formData, setFormData] = useState({
     type: 'announcement' as NotificationType,
@@ -39,6 +48,8 @@ export default function AdminNotifications() {
     preview: '',
     published_at: new Date(),
     expires_at: null as Date | null,
+    push_action_type: 'tab' as PushActionType,
+    push_action_target: 'notifications',
   });
 
   const fetchNotifications = useCallback(async () => {
@@ -80,6 +91,8 @@ export default function AdminNotifications() {
       preview: '',
       published_at: new Date(),
       expires_at: null,
+      push_action_type: 'tab',
+      push_action_target: 'notifications',
     });
     setModalVisible(true);
   };
@@ -93,6 +106,8 @@ export default function AdminNotifications() {
       preview: notification.preview,
       published_at: new Date(notification.published_at),
       expires_at: notification.expires_at ? new Date(notification.expires_at) : null,
+      push_action_type: notification.push_action_type || 'tab',
+      push_action_target: notification.push_action_target || 'notifications',
     });
     setModalVisible(true);
   };
@@ -124,6 +139,8 @@ export default function AdminNotifications() {
         preview: formData.preview.trim(),
         published_at: formData.published_at.toISOString(),
         expires_at: formData.expires_at ? formData.expires_at.toISOString() : null,
+        push_action_type: formData.push_action_type,
+        push_action_target: formData.push_action_target.trim(),
         updated_at: new Date().toISOString(),
       };
 
@@ -185,6 +202,61 @@ export default function AdminNotifications() {
       console.error('Error deleting notification:', error);
       setError(error?.message || 'Failed to delete notification');
       setLoading(false);
+    }
+  };
+
+  const handleSendPush = async (notification: Notification) => {
+    const confirmed = confirm(`Send push notification "${notification.title}" to all devices?`);
+    if (!confirmed) return;
+
+    setSendingPushId(notification.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: notification.title,
+          body: notification.preview,
+          data: {
+            push_action_type: notification.push_action_type,
+            push_action_target: notification.push_action_target,
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send push notification');
+      }
+
+      Alert.alert('Push Sent', `Sent to ${result.sent} of ${result.total} devices`);
+    } catch (err: any) {
+      Alert.alert('Error', err?.message || 'Failed to send push notification');
+    } finally {
+      setSendingPushId(null);
+    }
+  };
+
+  const getActionLabel = (notification: Notification) => {
+    switch (notification.push_action_type) {
+      case 'deal':
+        return 'Deal page';
+      case 'url':
+        return notification.push_action_target;
+      case 'tab': {
+        const tab = TAB_OPTIONS.find((t) => t.value === notification.push_action_target);
+        return tab ? `${tab.label} tab` : notification.push_action_target;
+      }
+      default:
+        return 'Notifications tab';
     }
   };
 
@@ -291,9 +363,26 @@ export default function AdminNotifications() {
                         </Text>
                       </View>
                     )}
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Push opens:</Text>
+                      <Text style={styles.detailValue} numberOfLines={1}>
+                        {getActionLabel(notification)}
+                      </Text>
+                    </View>
                   </View>
 
                   <View style={styles.notificationActions}>
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.pushButton]}
+                      onPress={() => handleSendPush(notification)}
+                      disabled={sendingPushId === notification.id}
+                    >
+                      <Send size={16} color={Colors.white} />
+                      <Text style={styles.actionButtonText}>
+                        {sendingPushId === notification.id ? 'Sending...' : 'Push'}
+                      </Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                       style={[styles.actionButton, styles.editButton]}
                       onPress={() => openEditModal(notification)}
@@ -410,6 +499,78 @@ export default function AdminNotifications() {
                   onClear={() => setFormData({ ...formData, expires_at: null })}
                 />
               </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Push Tap Destination</Text>
+                <View style={styles.typeButtons}>
+                  {([
+                    { value: 'tab', label: 'App Tab' },
+                    { value: 'deal', label: 'Deal' },
+                    { value: 'url', label: 'Web URL' },
+                  ] as { value: PushActionType; label: string }[]).map((opt) => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.typeButton, formData.push_action_type === opt.value && styles.typeButtonActive]}
+                      onPress={() => {
+                        const defaultTarget = opt.value === 'tab' ? 'notifications' : '';
+                        setFormData({ ...formData, push_action_type: opt.value, push_action_target: defaultTarget });
+                      }}
+                    >
+                      <Text style={[styles.typeButtonText, formData.push_action_type === opt.value && styles.typeButtonTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {formData.push_action_type === 'tab' && (
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Which Tab?</Text>
+                  <View style={styles.tabOptionsGrid}>
+                    {TAB_OPTIONS.map((tab) => (
+                      <TouchableOpacity
+                        key={tab.value}
+                        style={[styles.tabOption, formData.push_action_target === tab.value && styles.tabOptionActive]}
+                        onPress={() => setFormData({ ...formData, push_action_target: tab.value })}
+                      >
+                        <Text style={[styles.tabOptionText, formData.push_action_target === tab.value && styles.tabOptionTextActive]}>
+                          {tab.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {formData.push_action_type === 'deal' && (
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Deal ID</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={formData.push_action_target}
+                    onChangeText={(val) => setFormData({ ...formData, push_action_target: val })}
+                    placeholder="Paste the deal UUID"
+                    placeholderTextColor={Colors.textSecondary}
+                    autoCapitalize="none"
+                  />
+                </View>
+              )}
+
+              {formData.push_action_type === 'url' && (
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>URL</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={formData.push_action_target}
+                    onChangeText={(val) => setFormData({ ...formData, push_action_target: val })}
+                    placeholder="https://www.6skates.com/products/..."
+                    placeholderTextColor={Colors.textSecondary}
+                    autoCapitalize="none"
+                    keyboardType="url"
+                  />
+                </View>
+              )}
 
               <View style={styles.modalActions}>
                 <View style={styles.actionButtonContainer}>
@@ -585,6 +746,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     gap: 6,
   },
+  pushButton: {
+    backgroundColor: '#2563EB',
+  },
   editButton: {
     backgroundColor: Colors.primary,
   },
@@ -703,5 +867,30 @@ const styles = StyleSheet.create({
   },
   actionButtonContainer: {
     flex: 1,
+  },
+  tabOptionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  tabOption: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.cardBg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  tabOptionActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  tabOptionText: {
+    ...Typography.bodyBold,
+    color: Colors.white,
+    fontSize: 14,
+  },
+  tabOptionTextActive: {
+    color: Colors.white,
   },
 });

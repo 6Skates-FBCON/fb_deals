@@ -1,6 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { Platform, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { registerForPushNotifications, savePushToken } from '@/lib/pushNotifications';
 
 interface NotificationContextType {
   unreadCount: number;
@@ -14,6 +18,10 @@ const LAST_VIEWED_KEY = '@notifications_last_viewed';
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
+  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const responseListener = useRef<Notifications.EventSubscription | null>(null);
+  const router = useRouter();
 
   const refreshUnreadCount = async () => {
     try {
@@ -59,6 +67,70 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    let mounted = true;
+
+    const setupPush = async () => {
+      const token = await registerForPushNotifications();
+      if (!mounted || !token) return;
+
+      setExpoPushToken(token);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await savePushToken(session.user.id, token);
+      }
+    };
+
+    setupPush();
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(() => {
+      refreshUnreadCount();
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      const actionType = data?.push_action_type as string | undefined;
+      const actionTarget = data?.push_action_target as string | undefined;
+
+      if (actionType === 'url' && actionTarget) {
+        Linking.openURL(actionTarget);
+      } else if (actionType === 'deal' && actionTarget) {
+        router.push(`/deal/${actionTarget}` as any);
+      } else if (actionType === 'tab' && actionTarget) {
+        router.push(`/(tabs)/${actionTarget}` as any);
+      } else {
+        router.push('/(tabs)/notifications');
+      }
+    });
+
+    return () => {
+      mounted = false;
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      }
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !expoPushToken) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user && expoPushToken) {
+        (async () => {
+          await savePushToken(session.user.id, expoPushToken);
+        })();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [expoPushToken]);
 
   return (
     <NotificationContext.Provider value={{ unreadCount, markAllAsRead, refreshUnreadCount }}>
