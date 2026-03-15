@@ -12,7 +12,7 @@ import {
   Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Plus, Edit2, Trash2, X, Calendar, Megaphone, Bell, Send } from 'lucide-react-native';
+import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Megaphone, Bell, Send } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Notification, NotificationType, PushActionType } from '@/types/notification';
