@@ -71,10 +71,15 @@ export default function CheckoutScreen() {
     setPurchasing(true);
 
     try {
-      let variantId = deal.shopify_variant_id;
+      let variantId = deal.shopifyProduct?.variantId || deal.shopify_variant_id;
 
       if (!variantId && deal.shopify_product_id) {
         variantId = await getFirstVariantId(deal.shopify_product_id);
+      }
+
+      if (!variantId && deal.shopify_handle) {
+        const product = await import('@/lib/shopify').then(m => m.getProductByHandle(deal.shopify_handle));
+        variantId = product?.variants.edges[0]?.node.id || null;
       }
 
       if (!variantId) {

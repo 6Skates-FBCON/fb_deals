@@ -63,7 +63,7 @@ async function shopifyFetch<T>(query: string, variables: Record<string, any> = {
 
   console.log('[SHOPIFY] Fetching from:', SHOPIFY_STORE_URL);
 
-  const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/graphql.json`, {
+  const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2025-01/graphql.json`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -241,13 +241,13 @@ export async function getFirstVariantId(productId: string): Promise<string | nul
 
 export async function createCheckout(variantId: string, quantity: number = 1) {
   const query = `
-    mutation checkoutCreate($input: CheckoutCreateInput!) {
-      checkoutCreate(input: $input) {
-        checkout {
+    mutation cartCreate($input: CartInput!) {
+      cartCreate(input: $input) {
+        cart {
           id
-          webUrl
+          checkoutUrl
         }
-        checkoutUserErrors {
+        userErrors {
           code
           field
           message
@@ -258,9 +258,9 @@ export async function createCheckout(variantId: string, quantity: number = 1) {
 
   const variables = {
     input: {
-      lineItems: [
+      lines: [
         {
-          variantId,
+          merchandiseId: variantId,
           quantity,
         },
       ],
@@ -269,19 +269,22 @@ export async function createCheckout(variantId: string, quantity: number = 1) {
 
   try {
     const data = await shopifyFetch<{
-      checkoutCreate: {
-        checkout: { id: string; webUrl: string } | null;
-        checkoutUserErrors: Array<{ code: string; field: string[]; message: string }>;
+      cartCreate: {
+        cart: { id: string; checkoutUrl: string } | null;
+        userErrors: Array<{ code: string; field: string[]; message: string }>;
       };
     }>(query, variables);
 
-    if (data.checkoutCreate.checkoutUserErrors.length > 0) {
-      throw new Error(data.checkoutCreate.checkoutUserErrors[0].message);
+    if (data.cartCreate.userErrors.length > 0) {
+      throw new Error(data.cartCreate.userErrors[0].message);
     }
 
-    return data.checkoutCreate.checkout;
+    const cart = data.cartCreate.cart;
+    if (!cart) return null;
+
+    return { id: cart.id, webUrl: cart.checkoutUrl };
   } catch (error) {
-    console.error('Error creating checkout:', error);
+    console.error('Error creating cart:', error);
     throw error;
   }
 }

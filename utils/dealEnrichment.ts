@@ -7,11 +7,6 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
 }
 
 export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDeal> {
-  console.log('[ENRICH] Skipping Shopify enrichment for deal:', deal.id);
-  return deal as EnrichedDeal;
-
-  // Temporary: Shopify enrichment disabled for troubleshooting
-  /*
   try {
     if (!deal.shopify_handle && !deal.shopify_product_id) {
       return deal as EnrichedDeal;
@@ -20,13 +15,12 @@ export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDea
     let shopifyProduct: ShopifyProduct | null = null;
 
     if (deal.shopify_handle) {
-      shopifyProduct = await withTimeout(getProductByHandle(deal.shopify_handle), 3000);
+      shopifyProduct = await withTimeout(getProductByHandle(deal.shopify_handle), 5000);
     } else if (deal.shopify_product_id) {
-      shopifyProduct = await withTimeout(getProductById(deal.shopify_product_id), 3000);
+      shopifyProduct = await withTimeout(getProductById(deal.shopify_product_id), 5000);
     }
 
     if (!shopifyProduct) {
-      console.warn(`[ENRICH] No Shopify product found for deal ${deal.id}, using basic data`);
       return deal as EnrichedDeal;
     }
 
@@ -65,7 +59,6 @@ export async function enrichDealWithShopifyData(deal: Deal): Promise<EnrichedDea
     console.error(`[ENRICH] Error enriching deal ${deal.id}:`, error);
     return deal as EnrichedDeal;
   }
-  */
 }
 
 export async function enrichDealsWithShopifyData(deals: Deal[]): Promise<EnrichedDeal[]> {
