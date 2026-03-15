@@ -215,18 +215,18 @@ export default function AdminDashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
     gap: Spacing.md,
   },
   loadingText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
     marginTop: Spacing.md,
   },
   errorBanner: {
@@ -240,11 +240,11 @@ const styles = StyleSheet.create({
   },
   errorBannerText: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#FFFFFF',
     flex: 1,
   },
   retryButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF',
     paddingVertical: 6,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.sm,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
   },
   emptyState: {
     alignItems: 'center',
@@ -275,23 +275,23 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.sm,
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
     textAlign: 'center',
   },
   dealsList: {
     gap: Spacing.md,
   },
   dealCard: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
   },
   dealHeader: {
     flexDirection: 'row',
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   dealTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
     fontSize: 18,
   },
   statusBadge: {
@@ -313,25 +313,25 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
-    backgroundColor: Colors.charcoal,
+    backgroundColor: '#E0E0E0',
   },
   statusText: {
     ...Typography.caption,
     fontSize: 10,
     fontWeight: '700',
-    color: Colors.white,
+    color: '#000000',
   },
   status_active: {
-    color: '#4ADE80',
+    color: '#16A34A',
   },
   status_sold_out: {
-    color: '#F87171',
+    color: '#DC2626',
   },
   status_coming_soon: {
-    color: '#FBBF24',
+    color: '#D97706',
   },
   status_expired: {
-    color: Colors.textSecondary,
+    color: '#666666',
   },
   dealDetails: {
     gap: Spacing.sm,
@@ -344,12 +344,12 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
     fontSize: 14,
   },
   detailValue: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     fontSize: 14,
     flex: 1,
     textAlign: 'right',
@@ -369,13 +369,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   editButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#2563EB',
   },
   deleteButton: {
     backgroundColor: '#EF4444',
   },
   cancelButton: {
-    backgroundColor: Colors.charcoal,
+    backgroundColor: '#9CA3AF',
   },
   confirmPrompt: {
     flex: 1,
@@ -383,12 +383,12 @@ const styles = StyleSheet.create({
   },
   confirmText: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#000000',
     fontSize: 13,
   },
   actionButtonText: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#FFFFFF',
     fontSize: 14,
   },
   footer: {
@@ -396,9 +396,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#FFFFFF',
     padding: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: '#E0E0E0',
   },
 });

@@ -35,9 +35,9 @@ export default function AdminLayout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: Colors.darkBg,
+          backgroundColor: '#FFFFFF',
         },
-        headerTintColor: Colors.white,
+        headerTintColor: '#000000',
         headerTitleStyle: {
           fontWeight: '600',
         },
@@ -71,29 +71,29 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#000000',
   },
   errorContainer: {
     flex: 1,
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.lg,
   },
   errorText: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.sm,
   },
   errorSubtext: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
     textAlign: 'center',
   },
 });

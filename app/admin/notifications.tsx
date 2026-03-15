@@ -262,7 +262,7 @@ export default function AdminNotifications() {
 
   const getIcon = (type: NotificationType) => {
     const size = 20;
-    const color = Colors.primary;
+    const color = '#2563EB';
 
     switch (type) {
       case 'event':
@@ -416,7 +416,7 @@ export default function AdminNotifications() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingNotification ? 'Edit' : 'Create'} Notification</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                <X size={24} color={Colors.white} />
+                <X size={24} color="#000000" />
               </TouchableOpacity>
             </View>
 
@@ -451,7 +451,7 @@ export default function AdminNotifications() {
                   value={formData.title}
                   onChangeText={(title) => setFormData({ ...formData, title })}
                   placeholder="Notification title"
-                  placeholderTextColor={Colors.textSecondary}
+                  placeholderTextColor="#999999"
                 />
               </View>
 
@@ -462,7 +462,7 @@ export default function AdminNotifications() {
                   value={formData.preview}
                   onChangeText={(preview) => setFormData({ ...formData, preview })}
                   placeholder="Short preview for the list"
-                  placeholderTextColor={Colors.textSecondary}
+                  placeholderTextColor="#999999"
                   maxLength={100}
                 />
               </View>
@@ -474,7 +474,7 @@ export default function AdminNotifications() {
                   value={formData.message}
                   onChangeText={(message) => setFormData({ ...formData, message })}
                   placeholder="Full notification message"
-                  placeholderTextColor={Colors.textSecondary}
+                  placeholderTextColor="#999999"
                   multiline
                   numberOfLines={4}
                 />
@@ -551,7 +551,7 @@ export default function AdminNotifications() {
                     value={formData.push_action_target}
                     onChangeText={(val) => setFormData({ ...formData, push_action_target: val })}
                     placeholder="Paste the deal UUID"
-                    placeholderTextColor={Colors.textSecondary}
+                    placeholderTextColor="#999999"
                     autoCapitalize="none"
                   />
                 </View>
@@ -565,7 +565,7 @@ export default function AdminNotifications() {
                     value={formData.push_action_target}
                     onChangeText={(val) => setFormData({ ...formData, push_action_target: val })}
                     placeholder="https://www.6skates.com/products/..."
-                    placeholderTextColor={Colors.textSecondary}
+                    placeholderTextColor="#999999"
                     autoCapitalize="none"
                     keyboardType="url"
                   />
@@ -602,18 +602,18 @@ export default function AdminNotifications() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
     gap: Spacing.md,
   },
   loadingText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
   },
   errorBanner: {
     backgroundColor: '#EF4444',
@@ -626,11 +626,11 @@ const styles = StyleSheet.create({
   },
   errorBannerText: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#FFFFFF',
     flex: 1,
   },
   retryButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF',
     paddingVertical: 6,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.sm,
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
   },
   emptyState: {
     alignItems: 'center',
@@ -661,23 +661,23 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.sm,
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
     textAlign: 'center',
   },
   notificationsList: {
     gap: Spacing.md,
   },
   notificationCard: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
   },
   notificationHeader: {
     marginBottom: Spacing.md,
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
     fontSize: 18,
     flex: 1,
   },
@@ -701,7 +701,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
-    backgroundColor: Colors.charcoal,
+    backgroundColor: '#E0E0E0',
   },
   statusText: {
     ...Typography.caption,
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
   },
   notificationPreview: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#333333',
     marginBottom: Spacing.sm,
   },
   detailRow: {
@@ -724,12 +724,12 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#666666',
     fontSize: 14,
   },
   detailValue: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     fontSize: 14,
   },
   notificationActions: {
@@ -750,14 +750,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
   },
   editButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#2563EB',
   },
   deleteButton: {
     backgroundColor: '#EF4444',
   },
   actionButtonText: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#FFFFFF',
     fontSize: 14,
   },
   footer: {
@@ -765,23 +765,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#FFFFFF',
     padding: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: '#E0E0E0',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
     maxHeight: '90%',
-    borderWidth: 2,
-    borderColor: Colors.white,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -789,11 +789,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: '#E0E0E0',
   },
   modalTitle: {
     ...Typography.hero,
-    color: Colors.white,
+    color: '#000000',
   },
   closeButton: {
     padding: Spacing.sm,
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
   },
   formErrorText: {
     ...Typography.body,
-    color: Colors.white,
+    color: '#FFFFFF',
     textAlign: 'center',
   },
   formGroup: {
@@ -817,17 +817,17 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.sm,
   },
   input: {
     ...Typography.body,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
-    color: Colors.white,
+    color: '#000000',
   },
   textArea: {
     minHeight: 100,
@@ -842,22 +842,22 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
     alignItems: 'center',
   },
   typeButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
   typeButtonText: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     textTransform: 'capitalize',
   },
   typeButtonTextActive: {
-    color: Colors.white,
+    color: '#FFFFFF',
   },
   modalActions: {
     flexDirection: 'row',
@@ -877,20 +877,20 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
   },
   tabOptionActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
   tabOptionText: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     fontSize: 14,
   },
   tabOptionTextActive: {
-    color: Colors.white,
+    color: '#FFFFFF',
   },
 });

@@ -177,13 +177,13 @@ export default function AddDealScreen() {
         </View>
 
         <View style={styles.searchContainer}>
-          <Search size={20} color={Colors.textSecondary} />
+          <Search size={20} color="#666666" />
           <TextInput
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search products..."
-            placeholderTextColor={Colors.white}
+            placeholderTextColor="#999999"
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -270,7 +270,7 @@ export default function AddDealScreen() {
               value={title}
               onChangeText={setTitle}
               placeholder="Deal title"
-              placeholderTextColor={Colors.white}
+              placeholderTextColor="#999999"
             />
           </View>
 
@@ -281,7 +281,7 @@ export default function AddDealScreen() {
               value={description}
               onChangeText={setDescription}
               placeholder="Deal description"
-              placeholderTextColor={Colors.white}
+              placeholderTextColor="#999999"
               multiline
               numberOfLines={4}
             />
@@ -299,7 +299,7 @@ export default function AddDealScreen() {
                 value={regularPrice}
                 onChangeText={setRegularPrice}
                 placeholder="0.00"
-                placeholderTextColor={Colors.white}
+                placeholderTextColor="#999999"
                 keyboardType="decimal-pad"
               />
             </View>
@@ -311,7 +311,7 @@ export default function AddDealScreen() {
                 value={salePrice}
                 onChangeText={setSalePrice}
                 placeholder="0.00"
-                placeholderTextColor={Colors.white}
+                placeholderTextColor="#999999"
                 keyboardType="decimal-pad"
               />
             </View>
@@ -328,7 +328,7 @@ export default function AddDealScreen() {
               value={quantityTotal}
               onChangeText={setQuantityTotal}
               placeholder="0"
-              placeholderTextColor={Colors.white}
+              placeholderTextColor="#999999"
               keyboardType="number-pad"
             />
           </View>
@@ -363,7 +363,7 @@ export default function AddDealScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkBg,
+    backgroundColor: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.md,
   },
   inputGroup: {
@@ -385,17 +385,17 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.sm,
   },
   input: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     ...Typography.body,
-    color: Colors.white,
+    color: '#000000',
   },
   textArea: {
     height: 100,
@@ -411,9 +411,9 @@ const styles = StyleSheet.create({
   dateInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     gap: Spacing.sm,
@@ -421,33 +421,33 @@ const styles = StyleSheet.create({
   dateInput: {
     flex: 1,
     ...Typography.body,
-    color: Colors.white,
+    color: '#000000',
   },
   helperText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: '#666666',
     marginTop: 4,
   },
   selectedProduct: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: '#2563EB',
   },
   selectedProductTitle: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: 4,
   },
   selectedProductHandle: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: '#666666',
     marginBottom: Spacing.sm,
   },
   changeProductText: {
     ...Typography.bodyBold,
-    color: Colors.primary,
+    color: '#2563EB',
     fontSize: 14,
   },
   footer: {
@@ -455,10 +455,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#FFFFFF',
     padding: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: '#E0E0E0',
   },
   pickerHeader: {
     flexDirection: 'row',
@@ -466,22 +466,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: '#E0E0E0',
   },
   pickerTitle: {
     ...Typography.heading,
-    color: Colors.white,
+    color: '#000000',
   },
   cancelText: {
     ...Typography.bodyBold,
-    color: Colors.primary,
+    color: '#2563EB',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     margin: Spacing.lg,
@@ -490,33 +490,33 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     ...Typography.body,
-    color: Colors.white,
+    color: '#000000',
   },
   productList: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
   },
   productItem: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
   },
   productTitle: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: 4,
   },
   productHandle: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: '#666666',
     marginBottom: 4,
   },
   productPrice: {
     ...Typography.body,
-    color: Colors.primary,
+    color: '#2563EB',
   },
   emptyState: {
     alignItems: 'center',
@@ -525,12 +525,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: '#666666',
     textAlign: 'center',
   },
   emptyHint: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: '#666666',
     textAlign: 'center',
     marginTop: Spacing.sm,
   },
@@ -540,6 +540,6 @@ const styles = StyleSheet.create({
   },
   resultsText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: '#666666',
   },
 });

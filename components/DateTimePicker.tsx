@@ -128,13 +128,13 @@ export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = 
     <>
       {label && <Text style={styles.label}>{label}</Text>}
       <TouchableOpacity style={styles.input} onPress={openPicker}>
-        <Calendar size={20} color={Colors.textSecondary} />
+        <Calendar size={20} color="#666666" />
         <Text style={[styles.inputText, !safeValue && styles.placeholderText]}>
           {formatDisplayValue(safeValue)}
         </Text>
         {nullable && safeValue && onClear && (
           <TouchableOpacity onPress={onClear} style={styles.clearButton}>
-            <X size={20} color={Colors.textSecondary} />
+            <X size={20} color="#666666" />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
@@ -144,11 +144,11 @@ export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = 
           <View style={styles.modalContent}>
             <View style={styles.calendarHeader}>
               <TouchableOpacity onPress={previousMonth} style={styles.navButton}>
-                <ChevronLeft size={24} color={Colors.text} />
+                <ChevronLeft size={24} color="#000000" />
               </TouchableOpacity>
               <Text style={styles.monthYear}>{monthYear}</Text>
               <TouchableOpacity onPress={nextMonth} style={styles.navButton}>
-                <ChevronRight size={24} color={Colors.text} />
+                <ChevronRight size={24} color="#000000" />
               </TouchableOpacity>
             </View>
 
@@ -262,15 +262,15 @@ export function DateTimePicker({ value, onChange, mode = 'datetime', nullable = 
 const styles = StyleSheet.create({
   label: {
     ...Typography.bodyBold,
-    color: Colors.white,
+    color: '#000000',
     marginBottom: Spacing.sm,
   },
   input: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardBg,
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: '#E0E0E0',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     gap: Spacing.sm,
@@ -279,10 +279,10 @@ const styles = StyleSheet.create({
   inputText: {
     flex: 1,
     ...Typography.body,
-    color: Colors.white,
+    color: '#000000',
   },
   placeholderText: {
-    color: Colors.textSecondary,
+    color: '#999999',
   },
   clearButton: {
     padding: 4,
