@@ -51,13 +51,16 @@ Deno.serve(async (req: Request) => {
     let cleanStoreUrl = storeUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
     const shopifyUrl = `https://${cleanStoreUrl}/api/2024-10/graphql.json`;
 
+    const requestBody = JSON.stringify({ query, variables });
+
     const shopifyResponse = await fetch(shopifyUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
         "X-Shopify-Storefront-Access-Token": storefrontToken,
       },
-      body: JSON.stringify({ query, variables }),
+      body: requestBody,
     });
 
     const responseText = await shopifyResponse.text();
