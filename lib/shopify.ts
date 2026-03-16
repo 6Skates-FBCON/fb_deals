@@ -73,9 +73,19 @@ async function shopifyFetch<T>(query: string, variables: Record<string, any> = {
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    console.error('[SHOPIFY] Proxy error response:', text);
-    throw new Error(`Shopify proxy error: ${response.status} ${response.statusText}`);
+    let errorMessage = `Shopify proxy error: ${response.status}`;
+    try {
+      const errorJson = await response.json();
+      console.error('[SHOPIFY] Proxy error response:', errorJson);
+      errorMessage = errorJson.error || errorMessage;
+      if (errorJson.details) {
+        console.error('[SHOPIFY] Error details:', errorJson.details);
+      }
+    } catch {
+      const text = await response.text();
+      console.error('[SHOPIFY] Proxy error response:', text);
+    }
+    throw new Error(errorMessage);
   }
 
   const json = await response.json();
