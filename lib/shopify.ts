@@ -1,5 +1,5 @@
-const SHOPIFY_STORE_URL = process.env.EXPO_PUBLIC_SHOPIFY_STORE_URL;
-const SHOPIFY_STOREFRONT_TOKEN = process.env.EXPO_PUBLIC_SHOPIFY_STOREFRONT_TOKEN;
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 export interface ShopifyProduct {
   id: string;
@@ -57,25 +57,25 @@ export interface ShopifyProduct {
 }
 
 async function shopifyFetch<T>(query: string, variables: Record<string, any> = {}): Promise<T> {
-  if (!SHOPIFY_STORE_URL || !SHOPIFY_STOREFRONT_TOKEN) {
-    throw new Error('Shopify credentials are not configured. Please check your environment variables.');
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase credentials are not configured. Please check your environment variables.');
   }
 
-  console.log('[SHOPIFY] Fetching from:', SHOPIFY_STORE_URL);
+  const proxyUrl = `${SUPABASE_URL}/functions/v1/shopify-proxy`;
 
-  const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2025-01/graphql.json`, {
+  const response = await fetch(proxyUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN!,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
     },
     body: JSON.stringify({ query, variables }),
   });
 
   if (!response.ok) {
     const text = await response.text();
-    console.error('[SHOPIFY] API error response:', text);
-    throw new Error(`Shopify API error: ${response.status} ${response.statusText}`);
+    console.error('[SHOPIFY] Proxy error response:', text);
+    throw new Error(`Shopify proxy error: ${response.status} ${response.statusText}`);
   }
 
   const json = await response.json();
