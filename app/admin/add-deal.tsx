@@ -7,7 +7,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -17,6 +16,16 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/Button';
 import { DateTimePicker } from '@/components/DateTimePicker';
 import { ShopifyProduct, getAllProducts } from '@/lib/shopify';
+
+function showAlert(title: string, message: string, onOk?: () => void) {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}\n${message}`);
+    onOk?.();
+  } else {
+    const { Alert } = require('react-native');
+    Alert.alert(title, message, onOk ? [{ text: 'OK', onPress: onOk }] : undefined);
+  }
+}
 
 export default function AddDealScreen() {
   const router = useRouter();
@@ -53,7 +62,7 @@ export default function AddDealScreen() {
       console.log('[SHOPIFY] Loaded products:', products.length);
 
       if (products.length === 0) {
-        Alert.alert(
+        showAlert(
           'No Products Found',
           'No products were found in your Shopify store. Please make sure your store has active products.'
         );
@@ -63,7 +72,7 @@ export default function AddDealScreen() {
       }
     } catch (error: any) {
       console.error('[SHOPIFY] Error loading products:', error);
-      Alert.alert('Error', error.message || 'Failed to load Shopify products. Please check your store credentials.');
+      showAlert('Error', error.message || 'Failed to load Shopify products. Please check your store credentials.');
     } finally {
       setLoadingProducts(false);
     }
@@ -91,27 +100,27 @@ export default function AddDealScreen() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a title');
+      showAlert('Error', 'Please enter a title');
       return;
     }
 
     if (!regularPrice || !salePrice) {
-      Alert.alert('Error', 'Please enter regular and sale prices');
+      showAlert('Error', 'Please enter regular and sale prices');
       return;
     }
 
     if (!quantityTotal) {
-      Alert.alert('Error', 'Please enter quantity');
+      showAlert('Error', 'Please enter quantity');
       return;
     }
 
     if (!startDate || !endDate) {
-      Alert.alert('Error', 'Please enter start and end dates');
+      showAlert('Error', 'Please enter start and end dates');
       return;
     }
 
     if (!shopifyHandle) {
-      Alert.alert('Error', 'Please select a Shopify product');
+      showAlert('Error', 'Please select a Shopify product');
       return;
     }
 
@@ -119,12 +128,12 @@ export default function AddDealScreen() {
     const salePriceNum = parseFloat(salePrice);
 
     if (isNaN(regPrice) || isNaN(salePriceNum)) {
-      Alert.alert('Error', 'Invalid price format');
+      showAlert('Error', 'Invalid price format');
       return;
     }
 
     if (salePriceNum >= regPrice) {
-      Alert.alert('Error', 'Sale price must be less than regular price');
+      showAlert('Error', 'Sale price must be less than regular price');
       return;
     }
 
@@ -155,12 +164,10 @@ export default function AddDealScreen() {
 
       console.log('[ADD DEAL] Deal created successfully:', data);
 
-      Alert.alert('Success', 'Deal created successfully', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      showAlert('Success', 'Deal created successfully', () => router.back());
     } catch (error: any) {
       console.error('[ADD DEAL] Error creating deal:', error);
-      Alert.alert('Error', error.message || 'Failed to create deal');
+      showAlert('Error', error.message || 'Failed to create deal');
     } finally {
       setLoading(false);
     }
