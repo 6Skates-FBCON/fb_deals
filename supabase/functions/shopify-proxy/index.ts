@@ -53,17 +53,41 @@ Deno.serve(async (req: Request) => {
 
     const requestBody = JSON.stringify({ query, variables });
 
+    const maskedToken = storefrontToken.length > 10
+      ? `${storefrontToken.slice(0, 6)}...${storefrontToken.slice(-4)}`
+      : "***";
+
+    const outgoingHeaders = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-Shopify-Storefront-Access-Token": storefrontToken,
+    };
+
+    console.log("=== SHOPIFY REQUEST DEBUG ===");
+    console.log("URL:", shopifyUrl);
+    console.log("Method: POST");
+    console.log("Headers:", JSON.stringify({
+      ...outgoingHeaders,
+      "X-Shopify-Storefront-Access-Token": maskedToken,
+    }, null, 2));
+    console.log("Body:", requestBody);
+    console.log("Body length:", requestBody.length);
+    console.log("=== END REQUEST DEBUG ===");
+
     const shopifyResponse = await fetch(shopifyUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "X-Shopify-Storefront-Access-Token": storefrontToken,
-      },
+      headers: outgoingHeaders,
       body: requestBody,
     });
 
     const responseText = await shopifyResponse.text();
+
+    console.log("=== SHOPIFY RESPONSE DEBUG ===");
+    console.log("Status:", shopifyResponse.status);
+    console.log("Status Text:", shopifyResponse.statusText);
+    console.log("Response Headers:", JSON.stringify(Object.fromEntries(shopifyResponse.headers.entries()), null, 2));
+    console.log("Response Body (first 1000 chars):", responseText.substring(0, 1000));
+    console.log("=== END RESPONSE DEBUG ===");
 
     if (!shopifyResponse.ok) {
       return new Response(
