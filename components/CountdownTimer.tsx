@@ -32,7 +32,7 @@ export function CountdownTimer({ endDate, onExpire }: CountdownTimerProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Deal Ends In</Text>
+      <Text style={styles.label}>Deal Ends In or Until Sold Out</Text>
       <View style={styles.timerRow}>
         <View style={styles.timeBlock}>
           <Text style={styles.timeValue}>{countdown.days}</Text>

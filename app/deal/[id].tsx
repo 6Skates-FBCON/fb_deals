@@ -17,7 +17,6 @@ import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/Button';
 import { CountdownTimer } from '@/components/CountdownTimer';
-import { DealAvailability } from '@/components/DealAvailability';
 import { getDealStatus, formatPrice } from '@/utils/dealUtils';
 import { Deal, EnrichedDeal } from '@/types/deal';
 import { enrichDealWithShopifyData } from '@/utils/dealEnrichment';
@@ -244,10 +243,6 @@ export default function DealDetailScreen() {
               {deal.shopifyProduct?.description || deal.description || 'Grab this limited-time flash deal before it\'s gone! Perfect for any fingerboard enthusiast.'}
             </Text>
           </View>
-
-          <DealAvailability
-            availabilityPercent={(deal.quantity_remaining / deal.quantity_total) * 100}
-          />
         </View>
       </ScrollView>
 
