@@ -75,11 +75,11 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.captionBold,
-    color: Colors.white,
     textAlign: 'center',
     marginBottom: Spacing.md,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    color: '#FFFFFF',
   },
   timerRow: {
     flexDirection: 'row',
