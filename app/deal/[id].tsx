@@ -68,6 +68,31 @@ export default function DealDetailScreen() {
     }
   }, [fetchDeal, user]);
 
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`deal-${id}-changes`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'deals',
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          console.log('Deal updated:', payload);
+          fetchDeal();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, fetchDeal]);
+
   const handlePurchase = async () => {
     if (!deal) {
       Alert.alert('Error', 'Product information not available');
@@ -92,7 +117,7 @@ export default function DealDetailScreen() {
         throw new Error('Product variant not available');
       }
 
-      const checkout = await createCheckout(variantId, 1);
+      const checkout = await createCheckout(variantId, 1, user?.id, user?.email);
 
       if (!checkout || !checkout.webUrl) {
         throw new Error('Failed to create checkout');

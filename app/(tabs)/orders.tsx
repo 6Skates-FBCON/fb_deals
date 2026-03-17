@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { Package, CheckCircle, XCircle } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import { Package, CircleCheck as CheckCircle, Circle as XCircle, ExternalLink } from 'lucide-react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase, Database } from '@/lib/supabase';
 import { formatPrice } from '@/utils/dealUtils';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Purchase = Database['public']['Tables']['purchases']['Row'];
 type Deal = Database['public']['Tables']['deals']['Row'];
@@ -13,15 +14,23 @@ interface OrderWithDeal extends Purchase {
 }
 
 export default function OrdersScreen() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<OrderWithDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchOrders = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     try {
       const { data: purchasesData, error: purchasesError } = await supabase
         .from('purchases')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -49,11 +58,36 @@ export default function OrdersScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('user-orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'purchases',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('New order detected:', payload);
+          fetchOrders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchOrders]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -129,13 +163,26 @@ export default function OrdersScreen() {
             {order.deal && (
               <View style={styles.orderDetails}>
                 <Text style={styles.dealTitle}>{order.deal.title}</Text>
-                <Text style={styles.orderPrice}>{formatPrice(order.purchase_price)}</Text>
+                <View style={styles.priceRow}>
+                  <Text style={styles.orderPrice}>{formatPrice(order.purchase_price)}</Text>
+                  {order.quantity && order.quantity > 1 && (
+                    <Text style={styles.quantityText}>x{order.quantity}</Text>
+                  )}
+                </View>
               </View>
             )}
 
-            <View style={styles.customerInfo}>
-              <Text style={styles.customerLabel}>Order for:</Text>
-              <Text style={styles.customerName}>{order.customer_name}</Text>
+            <View style={styles.orderInfo}>
+              {order.shopify_order_number && (
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Order #:</Text>
+                  <Text style={styles.infoValue}>{order.shopify_order_number}</Text>
+                </View>
+              )}
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Customer:</Text>
+                <Text style={styles.infoValue}>{order.customer_name}</Text>
+              </View>
             </View>
           </View>
         ))
@@ -219,19 +266,31 @@ const styles = StyleSheet.create({
     color: Colors.white,
     marginBottom: 4,
   },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
   orderPrice: {
     ...Typography.title,
     color: Colors.primary,
   },
-  customerInfo: {
+  quantityText: {
+    ...Typography.body,
+    color: Colors.midGrey,
+  },
+  orderInfo: {
+    gap: 4,
+  },
+  infoRow: {
     flexDirection: 'row',
     gap: Spacing.sm,
   },
-  customerLabel: {
+  infoLabel: {
     ...Typography.caption,
     color: Colors.midGrey,
   },
-  customerName: {
+  infoValue: {
     ...Typography.caption,
     color: Colors.charcoal,
   },

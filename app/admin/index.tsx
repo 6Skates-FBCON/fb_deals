@@ -48,6 +48,26 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDeals();
+
+    const channel = supabase
+      .channel('admin-deals-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'deals',
+        },
+        (payload) => {
+          console.log('Deal change detected:', payload);
+          fetchDeals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchDeals]);
 
   const handleRefresh = useCallback(() => {

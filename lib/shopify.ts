@@ -249,7 +249,7 @@ export async function getFirstVariantId(productId: string): Promise<string | nul
   }
 }
 
-export async function createCheckout(variantId: string, quantity: number = 1) {
+export async function createCheckout(variantId: string, quantity: number = 1, userId?: string, userEmail?: string) {
   const query = `
     mutation cartCreate($input: CartInput!) {
       cartCreate(input: $input) {
@@ -266,6 +266,16 @@ export async function createCheckout(variantId: string, quantity: number = 1) {
     }
   `;
 
+  const noteAttributes: Array<{ key: string; value: string }> = [];
+
+  if (userId) {
+    noteAttributes.push({ key: 'user_id', value: userId });
+  }
+
+  if (userEmail) {
+    noteAttributes.push({ key: 'user_email', value: userEmail });
+  }
+
   const variables = {
     input: {
       lines: [
@@ -274,6 +284,7 @@ export async function createCheckout(variantId: string, quantity: number = 1) {
           quantity,
         },
       ],
+      ...(noteAttributes.length > 0 && { attributes: noteAttributes }),
     },
   };
 
