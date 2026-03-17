@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   notificationTime: {
     ...Typography.small,
-    color: Colors.midGrey,
+    color: '#FFFFFF',
   },
   notificationMessage: {
     ...Typography.caption,
