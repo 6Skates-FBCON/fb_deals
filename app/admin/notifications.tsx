@@ -16,6 +16,7 @@ import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Megaphone, Bell, Send }
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Notification, NotificationType, PushActionType } from '@/types/notification';
+import { Deal } from '@/types/deal';
 import { Button } from '@/components/Button';
 import { DateTimePicker } from '@/components/DateTimePicker';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -24,6 +25,7 @@ export default function AdminNotifications() {
   const router = useRouter();
   const { refreshUnreadCount } = useNotifications();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,14 +74,30 @@ export default function AdminNotifications() {
     }
   }, []);
 
+  const fetchDeals = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('deals')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDeals(data || []);
+    } catch (error: any) {
+      console.error('Error fetching deals:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchNotifications();
-  }, [fetchNotifications]);
+    fetchDeals();
+  }, [fetchNotifications, fetchDeals]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchNotifications();
-  }, [fetchNotifications]);
+    fetchDeals();
+  }, [fetchNotifications, fetchDeals]);
 
   const openCreateModal = () => {
     setEditingNotification(null);
@@ -545,15 +563,48 @@ export default function AdminNotifications() {
 
               {formData.push_action_type === 'deal' && (
                 <View style={styles.formGroup}>
-                  <Text style={styles.label}>Deal ID</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={formData.push_action_target}
-                    onChangeText={(val) => setFormData({ ...formData, push_action_target: val })}
-                    placeholder="Paste the deal UUID"
-                    placeholderTextColor="#999999"
-                    autoCapitalize="none"
-                  />
+                  <Text style={styles.label}>Select Deal</Text>
+                  {deals.length === 0 ? (
+                    <View style={styles.emptyDealsContainer}>
+                      <Text style={styles.emptyDealsText}>No deals available</Text>
+                    </View>
+                  ) : (
+                    <ScrollView style={styles.dealsSelector} showsVerticalScrollIndicator={false}>
+                      {deals.map((deal) => (
+                        <TouchableOpacity
+                          key={deal.id}
+                          style={[
+                            styles.dealOption,
+                            formData.push_action_target === deal.id && styles.dealOptionActive,
+                          ]}
+                          onPress={() => setFormData({ ...formData, push_action_target: deal.id })}
+                        >
+                          <View style={styles.dealOptionContent}>
+                            <Text
+                              style={[
+                                styles.dealOptionTitle,
+                                formData.push_action_target === deal.id && styles.dealOptionTitleActive,
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {deal.title}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.dealOptionPrice,
+                                formData.push_action_target === deal.id && styles.dealOptionPriceActive,
+                              ]}
+                            >
+                              ${deal.sale_price.toFixed(2)}
+                            </Text>
+                          </View>
+                          {formData.push_action_target === deal.id && (
+                            <View style={styles.dealSelectedIndicator} />
+                          )}
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  )}
                 </View>
               )}
 
@@ -892,5 +943,65 @@ const styles = StyleSheet.create({
   },
   tabOptionTextActive: {
     color: '#FFFFFF',
+  },
+  dealsSelector: {
+    maxHeight: 300,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#F5F5F5',
+  },
+  dealOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF',
+  },
+  dealOptionActive: {
+    backgroundColor: '#2563EB',
+  },
+  dealOptionContent: {
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
+  dealOptionTitle: {
+    ...Typography.bodyBold,
+    color: '#000000',
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  dealOptionTitleActive: {
+    color: '#FFFFFF',
+  },
+  dealOptionPrice: {
+    ...Typography.body,
+    color: '#666666',
+    fontSize: 13,
+  },
+  dealOptionPriceActive: {
+    color: '#FFFFFF',
+  },
+  dealSelectedIndicator: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#2563EB',
+  },
+  emptyDealsContainer: {
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+  },
+  emptyDealsText: {
+    ...Typography.body,
+    color: '#666666',
   },
 });
