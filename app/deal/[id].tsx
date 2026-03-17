@@ -364,11 +364,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     marginTop: Spacing.lg,
     borderWidth: 2,
-    borderColor: Colors.accent,
+    borderColor: '#FFFFFF',
   },
   urgencyText: {
     ...Typography.bodyBold,
-    color: Colors.accent,
+    color: '#FFFFFF',
     textAlign: 'center',
   },
   soldOutBanner: {
