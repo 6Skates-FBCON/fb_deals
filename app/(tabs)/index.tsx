@@ -108,9 +108,7 @@ export default function HomeScreen() {
               <View style={styles.cardInner}>
                 <View style={styles.imageWrapper}>
                   <Image
-                    source={{
-                      uri: 'https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg',
-                    }}
+                    source={require('@/assets/images/1.jpg')}
                     style={styles.squareImage}
                     resizeMode="cover"
                     blurRadius={10}
@@ -145,9 +143,7 @@ export default function HomeScreen() {
               <View style={styles.cardInner}>
                 <View style={styles.imageWrapper}>
                   <Image
-                    source={{
-                      uri: 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg',
-                    }}
+                    source={require('@/assets/images/2.jpg')}
                     style={styles.squareImage}
                     resizeMode="cover"
                     blurRadius={10}
