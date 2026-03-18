@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
@@ -13,7 +13,7 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const router = useRouter();
-  const { returnTo } = useRouter().params as { returnTo?: string };
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
 
   const validateInputs = () => {
     if (!email.trim()) {
