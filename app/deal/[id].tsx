@@ -56,16 +56,8 @@ export default function DealDetailScreen() {
   }, [id]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.replace('/auth/login');
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (user) {
-      fetchDeal();
-    }
-  }, [fetchDeal, user]);
+    fetchDeal();
+  }, [fetchDeal]);
 
   useEffect(() => {
     if (!id) return;
@@ -93,6 +85,11 @@ export default function DealDetailScreen() {
   }, [id, fetchDeal]);
 
   const handlePurchase = async () => {
+    if (!user) {
+      router.push(`/auth/login?returnTo=/deal/${id}`);
+      return;
+    }
+
     if (!deal) {
       Alert.alert('Error', 'Product information not available');
       return;
@@ -141,16 +138,12 @@ export default function DealDetailScreen() {
     router.back();
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   if (!deal) {

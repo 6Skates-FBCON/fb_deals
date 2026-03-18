@@ -12,6 +12,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const router = useRouter();
+  const { returnTo } = useRouter().params as { returnTo?: string };
 
   const validateInputs = () => {
     if (!email.trim()) {
@@ -47,7 +48,11 @@ export default function LoginScreen() {
         setError(signInError.message);
       }
     } else {
-      router.replace('/(tabs)');
+      if (returnTo) {
+        router.replace(returnTo);
+      } else {
+        router.replace('/(tabs)');
+      }
     }
   };
 
@@ -107,7 +112,7 @@ export default function LoginScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => router.replace('/auth/signup')}>
+        <TouchableOpacity onPress={() => router.replace(returnTo ? `/auth/signup?returnTo=${returnTo}` : '/auth/signup')}>
           <Text style={styles.link}>Create an account</Text>
         </TouchableOpacity>
       </View>
